@@ -118,7 +118,7 @@
   <!-- 速度調整エリア (追加) -->
   <div class="cat-title" data-i18n="cat_speed">シミュレーション速度</div>
   <div class="speed-control">
-    <input id="speed-slider" type="range" min="1" max="5000" value="1000" step="1" oninput="changeSpeed(this.value)">
+    <input id="speed-slider" type="range" min="1" max="5000" value="1" step="1" oninput="changeSpeed(this.value)">
     <div style="text-align:center">x <span id="speed-val">1000</span></div>
   </div>
 
@@ -307,7 +307,7 @@ const modal = document.getElementById('io-modal');
 const ioText = document.getElementById('io-text');
 
 // 速度変数 (可変に変更)
-let loopsPerFrame = 1000; 
+let loopsPerFrame = 1; 
 
 function changeSpeed(val) {
   loopsPerFrame = parseInt(val);
@@ -1317,3 +1317,4 @@ loop();
 </script>
 </body>
 </html>
+
