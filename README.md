@@ -66,3 +66,5 @@ Simply download the `index.html` file and open it in any modern web browser.
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+
