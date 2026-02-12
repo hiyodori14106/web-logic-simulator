@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Web Logic Simulator</title>
+<title>Logic Simulator Final (Multi-Lang v7 + Speed Control)</title>
 <style>
   /* --- デザイン設定 --- */
   body { margin:0; overflow:hidden; background:#1e1e1e; font-family:'Meiryo', 'Segoe UI', sans-serif; display:flex; height:100vh; color:#ddd; }
@@ -54,6 +54,10 @@
 
   /* 言語切り替え */
   #lang-select { background: #333; color: #ddd; border: 1px solid #555; padding: 5px; width: 100%; margin-bottom: 10px; font-size: 12px; border-radius: 4px; }
+  
+  /* 速度スライダー用 */
+  .speed-control { padding: 0 5px 10px 5px; color:#ccc; font-size:12px; }
+  .speed-control input { width: 100%; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -111,6 +115,13 @@
   <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Joint')" onclick="addPart('Joint')"><span class="icon">🔗</span> <span data-i18n="part_joint">中継点 (Joint)</span></div>
   <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Label')" onclick="addPart('Label')"><span class="icon">🏷️</span> <span data-i18n="part_label">ラベル</span></div>
 
+  <!-- 速度調整エリア (追加) -->
+  <div class="cat-title" data-i18n="cat_speed">シミュレーション速度</div>
+  <div class="speed-control">
+    <input id="speed-slider" type="range" min="1" max="5000" value="1000" step="1" oninput="changeSpeed(this.value)">
+    <div style="text-align:center">x <span id="speed-val">1000</span></div>
+  </div>
+
   <div class="tools-area">
     <button class="action-btn btn-create" onclick="createCustomChip()"><span data-i18n="btn_create_ic">⚡ 選択範囲をIC化</span></button>
     <div class="action-row">
@@ -154,6 +165,7 @@
 const TRANSLATIONS = {
   ja: {
     cat_user_chips: "ユーザー定義チップ (IC)", cat_ic_parts: "IC作成用パーツ", cat_input: "入力 (INPUT)", cat_output: "出力 (OUTPUT)", cat_gates: "論理ゲート (GATES)", cat_memory: "メモリ / CPU", cat_other: "その他",
+    cat_speed: "シミュレーション速度",
     part_pin_in: "入力ピン (Pin In)", part_pin_out: "出力ピン (Pin Out)", part_switch: "スイッチ", part_button: "ボタン", part_key: "キーボード入力", part_clock: "クロック",
     part_led: "LEDランプ", part_color_led: "カラーLED", part_hex: "7セグ (16進)", part_buzzer: "ブザー",
     part_dff: "Dフリップフロップ", part_jkff: "JKフリップフロップ", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4bit カウンタ", part_decoder: "デコーダ (3to8)",
@@ -169,6 +181,7 @@ const TRANSLATIONS = {
   },
   en: {
     cat_user_chips: "User Chips (IC)", cat_ic_parts: "IC Parts", cat_input: "Input (INPUT)", cat_output: "Output (OUTPUT)", cat_gates: "Logic Gates (GATES)", cat_memory: "Memory / CPU", cat_other: "Others",
+    cat_speed: "Simulation Speed",
     part_pin_in: "Pin In", part_pin_out: "Pin Out", part_switch: "Switch", part_button: "Button", part_key: "Keyboard Input", part_clock: "Clock",
     part_led: "LED Lamp", part_color_led: "Color LED", part_hex: "7-Seg (Hex)", part_buzzer: "Buzzer",
     part_dff: "D Flip-Flop", part_jkff: "JK Flip-Flop", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4bit Counter", part_decoder: "Decoder (3to8)",
@@ -184,6 +197,7 @@ const TRANSLATIONS = {
   },
   zh: {
     cat_user_chips: "用户芯片 (IC)", cat_ic_parts: "IC 组件", cat_input: "输入 (INPUT)", cat_output: "输出 (OUTPUT)", cat_gates: "逻辑门 (GATES)", cat_memory: "存储器 / CPU", cat_other: "其他",
+    cat_speed: "模拟速度",
     part_pin_in: "输入引脚 (Pin In)", part_pin_out: "输出引脚 (Pin Out)", part_switch: "开关", part_button: "按钮", part_key: "键盘输入", part_clock: "时钟",
     part_led: "LED 灯", part_color_led: "彩色 LED", part_hex: "7段数码管 (16进制)", part_buzzer: "蜂鸣器",
     part_dff: "D 触发器", part_jkff: "JK 触发器", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4位计数器", part_decoder: "译码器 (3to8)",
@@ -199,6 +213,7 @@ const TRANSLATIONS = {
   },
   es: {
     cat_user_chips: "Chips de Usuario (IC)", cat_ic_parts: "Partes IC", cat_input: "Entrada (INPUT)", cat_output: "Salida (OUTPUT)", cat_gates: "Puertas Lógicas", cat_memory: "Memoria / CPU", cat_other: "Otros",
+    cat_speed: "Velocidad de Simulación",
     part_pin_in: "Pin Entrada", part_pin_out: "Pin Salida", part_switch: "Interruptor", part_button: "Botón", part_key: "Entrada Teclado", part_clock: "Reloj",
     part_led: "Lámpara LED", part_color_led: "LED Color", part_hex: "7-Seg (Hex)", part_buzzer: "Zumbador",
     part_dff: "Flip-Flop D", part_jkff: "Flip-Flop JK", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "Contador 4bit", part_decoder: "Decodificador (3a8)",
@@ -214,6 +229,7 @@ const TRANSLATIONS = {
   },
   pt: {
     cat_user_chips: "Chips do Usuário (IC)", cat_ic_parts: "Peças IC", cat_input: "Entrada (INPUT)", cat_output: "Saída (OUTPUT)", cat_gates: "Portas Lógicas", cat_memory: "Memória / CPU", cat_other: "Outros",
+    cat_speed: "Velocidade de Simulação",
     part_pin_in: "Pino Entrada", part_pin_out: "Pino Saída", part_switch: "Interruptor", part_button: "Botão", part_key: "Teclado", part_clock: "Clock",
     part_led: "Lâmpada LED", part_color_led: "LED Colorido", part_hex: "7-Seg (Hex)", part_buzzer: "Buzzer",
     part_dff: "Flip-Flop D", part_jkff: "Flip-Flop JK", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "Contador 4bit", part_decoder: "Decodificador (3para8)",
@@ -229,6 +245,7 @@ const TRANSLATIONS = {
   },
   ko: {
     cat_user_chips: "사용자 칩 (IC)", cat_ic_parts: "IC 부품", cat_input: "입력 (INPUT)", cat_output: "출력 (OUTPUT)", cat_gates: "논리 게이트", cat_memory: "메모리 / CPU", cat_other: "기타",
+    cat_speed: "시뮬레이션 속도",
     part_pin_in: "입력 핀", part_pin_out: "출력 핀", part_switch: "스위치", part_button: "버튼", part_key: "키보드 입력", part_clock: "클럭",
     part_led: "LED 램프", part_color_led: "컬러 LED", part_hex: "7세그먼트 (Hex)", part_buzzer: "부저",
     part_dff: "D 플립플롭", part_jkff: "JK 플립플롭", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4비트 카운터", part_decoder: "디코더 (3to8)",
@@ -289,7 +306,14 @@ const audioCtx = new AudioContext();
 const modal = document.getElementById('io-modal');
 const ioText = document.getElementById('io-text');
 
-const LOOPS_PER_FRAME = 1000; 
+// 速度変数 (可変に変更)
+let loopsPerFrame = 1000; 
+
+function changeSpeed(val) {
+  loopsPerFrame = parseInt(val);
+  document.getElementById('speed-val').innerText = val;
+}
+
 const GRID = 20;
 const COLORS = { text: '#fff', select: '#00e5ff', wireOn: '#76ff03', wireOff: '#555', pin: '#999', pinActive: '#76ff03', chip: '#37474f' };
 const WIRE_COLORS = [null, '#ff2222', '#2288ff', '#ffff00', '#ff00ff', '#ffffff'];
@@ -805,7 +829,7 @@ window.onresize = resize;
 resize();
 
 function loop() {
-  for(let i=0; i<LOOPS_PER_FRAME; i++) {
+  for(let i=0; i<loopsPerFrame; i++) {
     globalTick++;
     parts.forEach(p => p.update(globalTick));
   }
@@ -1292,6 +1316,4 @@ updateUIText();
 loop();
 </script>
 </body>
-
 </html>
-
