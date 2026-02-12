@@ -3,7 +3,7 @@
 A high-performance, browser-based digital logic circuit simulator built with vanilla JavaScript and HTML5 Canvas.  
 バニラJavaScriptとHTML5 Canvasで作られた、高性能なブラウザベースのデジタル論理回路シミュレータです。
 
-🔗 **[Live Demo / デモを試す](https://YOUR_USERNAME.github.io/web-logic-simulator/)**  
+🔗 **[Live  / 試す](https://hiyodori14106.github.io/web-logic-simulator/)**  
 *(↑ After enabling GitHub Pages, replace YOUR_USERNAME with your GitHub ID / GitHub Pages有効化後、自分のIDに書き換えてください)*
 
 ---
