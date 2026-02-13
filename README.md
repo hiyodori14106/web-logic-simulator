@@ -67,4 +67,6 @@ Simply download the `index.html` file and open it in any modern web browser.
 
 This project is licensed under the MIT License.
 
+Logic Simulator
 
+![Visitor Count](https://visitor-badge.laobi.icu/badge?page_id=hiyodori14106.web-logic-simulator)
