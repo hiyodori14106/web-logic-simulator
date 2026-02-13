@@ -5,164 +5,164 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Web Logic Simulator</title>
 <style>
-  /* --- デザイン設定 --- */
-  body { margin:0; overflow:hidden; background:#1e1e1e; font-family:'Meiryo', 'Segoe UI', sans-serif; display:flex; height:100vh; color:#ddd; }
+ /* --- デザイン設定 --- */
+ body { margin:0; overflow:hidden; background:#1e1e1e; font-family:'Meiryo', 'Segoe UI', sans-serif; display:flex; height:100vh; color:#ddd; }
   
-  /* サイドバー */
-  #sidebar { width:280px; background:#252525; border-right:1px solid #333; display:flex; flex-direction:column; padding:10px; box-sizing:border-box; user-select:none; z-index:10; overflow-y:auto; }
-  #sidebar::-webkit-scrollbar { width: 8px; }
-  #sidebar::-webkit-scrollbar-track { background: #252525; }
-  #sidebar::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-  #sidebar::-webkit-scrollbar-thumb:hover { background: #555; }
+ /* サイドバー */
+ #sidebar { width:280px; background:#252525; border-right:1px solid #333; display:flex; flex-direction:column; padding:10px; box-sizing:border-box; user-select:none; z-index:10; overflow-y:auto; }
+ #sidebar::-webkit-scrollbar { width: 8px; }
+ #sidebar::-webkit-scrollbar-track { background: #252525; }
+ #sidebar::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+ #sidebar::-webkit-scrollbar-thumb:hover { background: #555; }
 
-  .cat-title { font-size:12px; color:#aaa; margin:15px 0 5px 0; font-weight:bold; border-bottom:1px solid #444; padding-bottom:2px; }
-  .cat-title:first-child { margin-top: 0; }
+ .cat-title { font-size:12px; color:#aaa; margin:15px 0 5px 0; font-weight:bold; border-bottom:1px solid #444; padding-bottom:2px; }
+ .cat-title:first-child { margin-top: 0; }
 
-  /* ツールボタン */
-  .tool-btn { display:flex; align-items:center; gap:10px; padding:6px 10px; margin-bottom:4px; background:#333; border:1px solid #444; border-radius:4px; cursor:grab; font-size:13px; color:#ccc; flex-shrink: 0; transition:all 0.1s; }
-  .tool-btn:hover { background: #444; border-color: #666; color: #fff; transform: translateX(2px); }
-  .tool-btn:active { cursor: grabbing; transform: scale(0.98); }
-  .icon { width: 20px; text-align: center; }
+ /* ツールボタン */
+ .tool-btn { display:flex; align-items:center; gap:10px; padding:6px 10px; margin-bottom:4px; background:#333; border:1px solid #444; border-radius:4px; cursor:grab; font-size:13px; color:#ccc; flex-shrink: 0; transition:all 0.1s; }
+ .tool-btn:hover { background: #444; border-color: #666; color: #fff; transform: translateX(2px); }
+ .tool-btn:active { cursor: grabbing; transform: scale(0.98); }
+ .icon { width: 20px; text-align: center; }
 
-  /* 下部ツールエリア */
-  .tools-area { margin-top: auto; border-top: 1px solid #444; padding-top: 10px; }
-  .action-row { display: flex; gap: 5px; margin-bottom: 5px; }
-  .action-btn { flex:1; padding:8px; cursor:pointer; border:none; border-radius:4px; font-weight:bold; color:white; font-size:12px; display:flex; justify-content:center; align-items:center; transition: background 0.2s; }
-  .action-btn:hover { opacity: 0.9; }
+ /* 下部ツールエリア */
+ .tools-area { margin-top: auto; border-top: 1px solid #444; padding-top: 10px; }
+ .action-row { display: flex; gap: 5px; margin-bottom: 5px; }
+ .action-btn { flex:1; padding:8px; cursor:pointer; border:none; border-radius:4px; font-weight:bold; color:white; font-size:12px; display:flex; justify-content:center; align-items:center; transition: background 0.2s; }
+ .action-btn:hover { opacity: 0.9; }
 
-  .btn-mode { background: #444; border: 1px solid #555; }
-  .btn-mode.active { background: #0078d4; border-color: #005a9e; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
-  .btn-create { background: #e65100; width: 100%; margin-bottom:10px; font-size:13px; }
-  .btn-save { background: #2b88d8; }
-  .btn-io { background:#546e7a; width:100%; margin-bottom:5px; }
-  .btn-clear { background:#d13438; width:100%; }
+ .btn-mode { background: #444; border: 1px solid #555; }
+ .btn-mode.active { background: #0078d4; border-color: #005a9e; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
+ .btn-create { background: #e65100; width: 100%; margin-bottom:10px; font-size:13px; }
+ .btn-save { background: #2b88d8; }
+ .btn-io { background:#546e7a; width:100%; margin-bottom:5px; }
+ .btn-clear { background:#d13438; width:100%; }
 
-  /* キャンバス */
-  #canvas-container { flex: 1; position: relative; cursor: default; overflow: hidden; background: #1e1e1e; }
-  canvas { display: block; outline: none; }
+ /* キャンバス */
+ #canvas-container { flex: 1; position: relative; cursor: default; overflow: hidden; background: #1e1e1e; }
+ canvas { display: block; outline: none; }
 
-  /* ステータスバー */
-  #status-bar { position:absolute; bottom:0; left:0; right:0; height:26px; background:#0078d4; color:white; font-size:12px; line-height:26px; padding:0 10px; opacity:0.95; display:flex; justify-content:space-between; pointer-events:none; }
+ /* ステータスバー */
+ #status-bar { position:absolute; bottom:0; left:0; right:0; height:26px; background:#0078d4; color:white; font-size:12px; line-height:26px; padding:0 10px; opacity:0.95; display:flex; justify-content:space-between; pointer-events:none; }
 
-  /* モーダル (テキスト入出力) */
-  #io-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:100; justify-content:center; align-items:center; }
-  .modal-content { background: #2d2d2d; padding: 20px; border-radius: 8px; width: 600px; border: 1px solid #555; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-  .modal-content h3 { margin-top: 0; color: #fff; border-bottom: 1px solid #444; padding-bottom: 10px; }
-  .modal-content textarea { width: 100%; height: 300px; background: #111; color: #0f0; border: 1px solid #444; font-family: monospace; font-size: 11px; margin-bottom: 10px; resize: vertical; box-sizing: border-box; padding: 5px; }
-  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
-  #file-input { display: none; }
+ /* モーダル (テキスト入出力) */
+ #io-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:100; justify-content:center; align-items:center; }
+ .modal-content { background: #2d2d2d; padding: 20px; border-radius: 8px; width: 600px; border: 1px solid #555; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+ .modal-content h3 { margin-top: 0; color: #fff; border-bottom: 1px solid #444; padding-bottom: 10px; }
+ .modal-content textarea { width: 100%; height: 300px; background: #111; color: #0f0; border: 1px solid #444; font-family: monospace; font-size: 11px; margin-bottom: 10px; resize: vertical; box-sizing: border-box; padding: 5px; }
+ .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+ #file-input { display: none; }
 
-  /* 言語切り替え */
-  #lang-select { background: #333; color: #ddd; border: 1px solid #555; padding: 5px; width: 100%; margin-bottom: 10px; font-size: 12px; border-radius: 4px; }
+ /* 言語切り替え */
+ #lang-select { background: #333; color: #ddd; border: 1px solid #555; padding: 5px; width: 100%; margin-bottom: 10px; font-size: 12px; border-radius: 4px; }
   
-  /* 速度スライダー用 */
-  .speed-control { padding: 0 5px 10px 5px; color:#ccc; font-size:12px; }
-  .speed-control input { width: 100%; cursor: pointer; }
+ /* 速度スライダー用 */
+ .speed-control { padding: 0 5px 10px 5px; color:#ccc; font-size:12px; }
+ .speed-control input { width: 100%; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <div id="sidebar">
-  <select id="lang-select" onchange="changeLanguage(this.value)">
-    <option value="ja">🇯🇵 日本語</option>
-    <option value="en">🇺🇸 English</option>
-    <option value="zh">🇨🇳 中文 (简体)</option>
-    <option value="es">🇪🇸 Español</option>
-    <option value="pt">🇧🇷 Português</option>
-    <option value="ko">🇰🇷 한국어</option>
-  </select>
+ <select id="lang-select" onchange="changeLanguage(this.value)">
+  <option value="ja">🇯🇵 日本語</option>
+  <option value="en">🇺🇸 English</option>
+  <option value="zh">🇨🇳 中文 (简体)</option>
+  <option value="es">🇪🇸 Español</option>
+  <option value="pt">🇧🇷 Português</option>
+  <option value="ko">🇰🇷 한국어</option>
+ </select>
 
-  <div id="user-chips-area">
-    <div class="cat-title" data-i18n="cat_user_chips">ユーザー定義チップ (IC)</div>
-    <div id="user-chips-list"></div>
+ <div id="user-chips-area">
+  <div class="cat-title" data-i18n="cat_user_chips">ユーザー定義チップ (IC)</div>
+  <div id="user-chips-list"></div>
+ </div>
+
+ <div class="cat-title" data-i18n="cat_ic_parts">IC作成用パーツ</div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'PinIn')" onclick="addPart('PinIn')"><span class="icon">📥</span> <span data-i18n="part_pin_in">入力ピン (Pin In)</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'PinOut')" onclick="addPart('PinOut')"><span class="icon">📤</span> <span data-i18n="part_pin_out">出力ピン (Pin Out)</span></div>
+
+ <div class="cat-title" data-i18n="cat_input">入力 (INPUT)</div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Switch')" onclick="addPart('Switch')"><span class="icon">🔌</span> <span data-i18n="part_switch">スイッチ</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Button')" onclick="addPart('Button')"><span class="icon">🔴</span> <span data-i18n="part_button">ボタン</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'KeyInput')" onclick="addPart('KeyInput')"><span class="icon">⌨️</span> <span data-i18n="part_key">キーボード入力</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Clock')" onclick="addPart('Clock')"><span class="icon">⏰</span> <span data-i18n="part_clock">クロック</span></div>
+
+ <div class="cat-title" data-i18n="cat_output">出力 (OUTPUT)</div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'LED')" onclick="addPart('LED')"><span class="icon">💡</span> <span data-i18n="part_led">LEDランプ</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'ColorLED')" onclick="addPart('ColorLED')"><span class="icon">🌈</span> <span data-i18n="part_color_led">カラーLED</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'HexDisp')" onclick="addPart('HexDisp')"><span class="icon">8️⃣</span> <span data-i18n="part_hex">7セグ (16進)</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Buzzer')" onclick="addPart('Buzzer')"><span class="icon">🔊</span> <span data-i18n="part_buzzer">ブザー</span></div>
+
+ <div class="cat-title" data-i18n="cat_gates">論理ゲート (GATES)</div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'AND')" onclick="addPart('AND')"><span class="icon">＆</span> AND</div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'OR')" onclick="addPart('OR')"><span class="icon">∥</span> OR</div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'NOT')" onclick="addPart('NOT')"><span class="icon">❗</span> NOT</div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'NAND')" onclick="addPart('NAND')"><span class="icon">⚡</span> NAND</div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'XOR')" onclick="addPart('XOR')"><span class="icon">❌</span> XOR</div>
+
+ <div class="cat-title" data-i18n="cat_memory">メモリ / CPU</div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'D-FF')" onclick="addPart('D-FF')"><span class="icon">📦</span> <span data-i18n="part_dff">Dフリップフロップ</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'JK-FF')" onclick="addPart('JK-FF')"><span class="icon">🔄</span> <span data-i18n="part_jkff">JKフリップフロップ</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'RAM')" onclick="addPart('RAM')"><span class="icon">💾</span> <span data-i18n="part_ram">RAM (4bit x 16)</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'ROM')" onclick="addPart('ROM')"><span class="icon">💿</span> <span data-i18n="part_rom">ROM (4bit x 16)</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Counter')" onclick="addPart('Counter')"><span class="icon">🔢</span> <span data-i18n="part_counter">4bit カウンタ</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Decoder')" onclick="addPart('Decoder')"><span class="icon">📶</span> <span data-i18n="part_decoder">デコーダ (3to8)</span></div>
+
+ <div class="cat-title" data-i18n="cat_other">その他</div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Matrix')" onclick="addPart('Matrix')"><span class="icon">▦</span> <span data-i18n="part_matrix">マトリクスLED</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'ColorMatrix')" onclick="addPart('ColorMatrix')"><span class="icon">🏳️‍🌈</span> <span data-i18n="part_color_matrix">カラーマトリクス</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Delay')" onclick="addPart('Delay')"><span class="icon">⏳</span> <span data-i18n="part_delay">遅延 (Delay)</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Joint')" onclick="addPart('Joint')"><span class="icon">🔗</span> <span data-i18n="part_joint">中継点 (Joint)</span></div>
+ <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Label')" onclick="addPart('Label')"><span class="icon">🏷️</span> <span data-i18n="part_label">ラベル</span></div>
+
+ <!-- 速度調整エリア -->
+ <div class="cat-title" data-i18n="cat_speed">シミュレーション速度</div>
+ <div class="speed-control">
+  <input id="speed-slider" type="range" min="1" max="5000" value="1" step="1" oninput="changeSpeed(this.value)">
+  <div style="text-align:center">x <span id="speed-val">1</span></div>
+ </div>
+
+ <div class="tools-area">
+  <button class="action-btn btn-create" onclick="createCustomChip()"><span data-i18n="btn_create_ic">⚡ 選択範囲をIC化</span></button>
+  <div class="action-row">
+   <button id="btn-ptr" class="action-btn btn-mode active" onclick="setMode('pointer')"><span data-i18n="btn_mode_ptr">👆 操作</span></button>
+   <button id="btn-pan" class="action-btn btn-mode" onclick="setMode('pan')"><span data-i18n="btn_mode_pan">✋ 移動</span></button>
+   <button id="btn-sel" class="action-btn btn-mode" onclick="setMode('select')"><span data-i18n="btn_mode_sel">⛝ 選択</span></button>
+  </div>
+  <button class="action-btn btn-io" onclick="openIO()"><span data-i18n="btn_share">📋 テキストデータ共有</span></button>
+  <div class="action-row">
+   <button class="action-btn btn-save" onclick="saveFile()"><span data-i18n="btn_save">💾 保存</span></button>
+   <button class="action-btn btn-save" onclick="document.getElementById('file-input').click()"><span data-i18n="btn_open">📂 開く</span></button>
+  </div>
+ <button class="action-btn btn-clear" onclick="clearAll()"><span data-i18n="btn_clear">🗑 全消去</span></button>
+   
+  <!-- アクセスカウンター (Views) -->
+  <div style="margin-top: 15px; text-align: center; padding-bottom: 10px;">
+   <span style="font-size:12px; color:#aaa; margin-right:5px;">Total Views:</span>
+   <img src="https://visitor-badge.laobi.icu/badge?page_id=hiyodori14106.web-logic-simulator" alt="Visitor Count" style="vertical-align: middle;">
   </div>
 
-  <div class="cat-title" data-i18n="cat_ic_parts">IC作成用パーツ</div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'PinIn')" onclick="addPart('PinIn')"><span class="icon">📥</span> <span data-i18n="part_pin_in">入力ピン (Pin In)</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'PinOut')" onclick="addPart('PinOut')"><span class="icon">📤</span> <span data-i18n="part_pin_out">出力ピン (Pin Out)</span></div>
-
-  <div class="cat-title" data-i18n="cat_input">入力 (INPUT)</div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Switch')" onclick="addPart('Switch')"><span class="icon">🔌</span> <span data-i18n="part_switch">スイッチ</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Button')" onclick="addPart('Button')"><span class="icon">🔴</span> <span data-i18n="part_button">ボタン</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'KeyInput')" onclick="addPart('KeyInput')"><span class="icon">⌨️</span> <span data-i18n="part_key">キーボード入力</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Clock')" onclick="addPart('Clock')"><span class="icon">⏰</span> <span data-i18n="part_clock">クロック</span></div>
-
-  <div class="cat-title" data-i18n="cat_output">出力 (OUTPUT)</div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'LED')" onclick="addPart('LED')"><span class="icon">💡</span> <span data-i18n="part_led">LEDランプ</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'ColorLED')" onclick="addPart('ColorLED')"><span class="icon">🌈</span> <span data-i18n="part_color_led">カラーLED</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'HexDisp')" onclick="addPart('HexDisp')"><span class="icon">8️⃣</span> <span data-i18n="part_hex">7セグ (16進)</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Buzzer')" onclick="addPart('Buzzer')"><span class="icon">🔊</span> <span data-i18n="part_buzzer">ブザー</span></div>
-
-  <div class="cat-title" data-i18n="cat_gates">論理ゲート (GATES)</div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'AND')" onclick="addPart('AND')"><span class="icon">＆</span> AND</div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'OR')" onclick="addPart('OR')"><span class="icon">∥</span> OR</div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'NOT')" onclick="addPart('NOT')"><span class="icon">❗</span> NOT</div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'NAND')" onclick="addPart('NAND')"><span class="icon">⚡</span> NAND</div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'XOR')" onclick="addPart('XOR')"><span class="icon">❌</span> XOR</div>
-
-  <div class="cat-title" data-i18n="cat_memory">メモリ / CPU</div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'D-FF')" onclick="addPart('D-FF')"><span class="icon">📦</span> <span data-i18n="part_dff">Dフリップフロップ</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'JK-FF')" onclick="addPart('JK-FF')"><span class="icon">🔄</span> <span data-i18n="part_jkff">JKフリップフロップ</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'RAM')" onclick="addPart('RAM')"><span class="icon">💾</span> <span data-i18n="part_ram">RAM (4bit x 16)</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'ROM')" onclick="addPart('ROM')"><span class="icon">💿</span> <span data-i18n="part_rom">ROM (4bit x 16)</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Counter')" onclick="addPart('Counter')"><span class="icon">🔢</span> <span data-i18n="part_counter">4bit カウンタ</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Decoder')" onclick="addPart('Decoder')"><span class="icon">📶</span> <span data-i18n="part_decoder">デコーダ (3to8)</span></div>
-
-  <div class="cat-title" data-i18n="cat_other">その他</div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Matrix')" onclick="addPart('Matrix')"><span class="icon">▦</span> <span data-i18n="part_matrix">マトリクスLED</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'ColorMatrix')" onclick="addPart('ColorMatrix')"><span class="icon">🏳️‍🌈</span> <span data-i18n="part_color_matrix">カラーマトリクス</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Delay')" onclick="addPart('Delay')"><span class="icon">⏳</span> <span data-i18n="part_delay">遅延 (Delay)</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Joint')" onclick="addPart('Joint')"><span class="icon">🔗</span> <span data-i18n="part_joint">中継点 (Joint)</span></div>
-  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Label')" onclick="addPart('Label')"><span class="icon">🏷️</span> <span data-i18n="part_label">ラベル</span></div>
-
-  <!-- 速度調整エリア (追加) -->
-  <div class="cat-title" data-i18n="cat_speed">シミュレーション速度</div>
-  <div class="speed-control">
-    <input id="speed-slider" type="range" min="1" max="5000" value="1" step="1" oninput="changeSpeed(this.value)">
-    <div style="text-align:center">x <span id="speed-val">1</span></div>
-  </div>
-
-  <div class="tools-area">
-    <button class="action-btn btn-create" onclick="createCustomChip()"><span data-i18n="btn_create_ic">⚡ 選択範囲をIC化</span></button>
-    <div class="action-row">
-      <button id="btn-ptr" class="action-btn btn-mode active" onclick="setMode('pointer')"><span data-i18n="btn_mode_ptr">👆 操作</span></button>
-      <button id="btn-pan" class="action-btn btn-mode" onclick="setMode('pan')"><span data-i18n="btn_mode_pan">✋ 移動</span></button>
-      <button id="btn-sel" class="action-btn btn-mode" onclick="setMode('select')"><span data-i18n="btn_mode_sel">⛝ 選択</span></button>
-    </div>
-    <button class="action-btn btn-io" onclick="openIO()"><span data-i18n="btn_share">📋 テキストデータ共有</span></button>
-    <div class="action-row">
-      <button class="action-btn btn-save" onclick="saveFile()"><span data-i18n="btn_save">💾 保存</span></button>
-      <button class="action-btn btn-save" onclick="document.getElementById('file-input').click()"><span data-i18n="btn_open">📂 開く</span></button>
-    </div>
-  <button class="action-btn btn-clear" onclick="clearAll()"><span data-i18n="btn_clear">🗑 全消去</span></button>
-    
-    <!-- アクセスカウンター (Views) -->
-    <div style="margin-top: 15px; text-align: center; padding-bottom: 10px;">
-      <span style="font-size:12px; color:#aaa; margin-right:5px;">Total Views:</span>
-      <img src="https://visitor-badge.laobi.icu/badge?page_id=hiyodori14106.web-logic-simulator" alt="Visitor Count" style="vertical-align: middle;">
-    </div>
-
-  </div> <!-- tools-areaの終わり -->
+ </div> <!-- tools-areaの終わり -->
 </div> <!-- sidebarの終わり -->
 
 <div id="canvas-container">
-  <canvas id="circuitCanvas" tabindex="0"></canvas>
-  <div id="status-bar">
-    <span id="status-text">Ready</span>
-    <span>Ctrl+Z:Undo / Ctrl+C:Copy / Ctrl+V:Paste</span>
-  </div>
+ <canvas id="circuitCanvas" tabindex="0"></canvas>
+ <div id="status-bar">
+  <span id="status-text">Ready</span>
+  <span>Ctrl+Z:Undo / Ctrl+C:Copy / Ctrl+V:Paste</span>
+ </div>
 </div>
 
 <div id="io-modal">
-  <div class="modal-content">
-    <h3 data-i18n="modal_title">回路データ (JSON)</h3>
-    <textarea id="io-text" placeholder="ここにJSONデータを貼り付け..."></textarea>
-    <div class="modal-btns">
-      <button class="action-btn btn-save" onclick="closeIO()"><span data-i18n="btn_close">閉じる</span></button>
-      <button class="action-btn btn-save" onclick="copyIO()"><span data-i18n="btn_copy">コピー</span></button>
-      <button class="action-btn btn-reset" onclick="loadFromText()"><span data-i18n="btn_load">読込実行</span></button>
-    </div>
+ <div class="modal-content">
+  <h3 data-i18n="modal_title">回路データ (JSON)</h3>
+  <textarea id="io-text" placeholder="ここにJSONデータを貼り付け..."></textarea>
+  <div class="modal-btns">
+   <button class="action-btn btn-save" onclick="closeIO()"><span data-i18n="btn_close">閉じる</span></button>
+   <button class="action-btn btn-save" onclick="copyIO()"><span data-i18n="btn_copy">コピー</span></button>
+   <button class="action-btn btn-reset" onclick="loadFromText()"><span data-i18n="btn_load">読込実行</span></button>
   </div>
+ </div>
 </div>
 
 <input type="file" id="file-input" accept=".json" onchange="loadFile(this)">
@@ -170,155 +170,150 @@
 <script>
 // --- 多言語設定 (Multilingual) ---
 const TRANSLATIONS = {
-  ja: {
-    cat_user_chips: "ユーザー定義チップ (IC)", cat_ic_parts: "IC作成用パーツ", cat_input: "入力 (INPUT)", cat_output: "出力 (OUTPUT)", cat_gates: "論理ゲート (GATES)", cat_memory: "メモリ / CPU", cat_other: "その他",
-    cat_speed: "シミュレーション速度",
-    part_pin_in: "入力ピン (Pin In)", part_pin_out: "出力ピン (Pin Out)", part_switch: "スイッチ", part_button: "ボタン", part_key: "キーボード入力", part_clock: "クロック",
-    part_led: "LEDランプ", part_color_led: "カラーLED", part_hex: "7セグ (16進)", part_buzzer: "ブザー",
-    part_dff: "Dフリップフロップ", part_jkff: "JKフリップフロップ", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4bit カウンタ", part_decoder: "デコーダ (3to8)",
-    part_matrix: "マトリクスLED", part_color_matrix: "カラーマトリクス", part_delay: "遅延 (Delay)", part_joint: "中継点 (Joint)", part_label: "ラベル",
-    btn_create_ic: "⚡ 選択範囲をIC化", btn_mode_ptr: "👆 操作", btn_mode_pan: "✋ 移動", btn_mode_sel: "⛝ 選択",
-    btn_share: "📋 テキストデータ共有", btn_save: "💾 保存", btn_open: "📂 開く", btn_clear: "🗑 全消去",
-    modal_title: "回路データ (JSON)", btn_close: "閉じる", btn_copy: "コピー", btn_load: "読込実行",
-    placeholder_json: "ここにJSONデータを貼り付け...", default_text: "テキスト",
-    prompt_rom: "ROMデータ (16進数 16個 スペース区切り):", prompt_key: "割当キー:", confirm_toggle: "トグルモードにしますか?",
-    prompt_digits: "桁数 (1-8):", prompt_rows: "行数 (Rows):", prompt_cols: "列数 (Cols):", prompt_size: "全体の幅(px)を設定 (空欄で自動: $px にリサイズ)", prompt_label: "ラベル / 値:",
-    alert_select_chip: "チップ化する部品を選択してください", prompt_chip_name: "チップ名を入力:", confirm_no_pins: "入出力ピンが含まれていません。続行しますか？",
-    status_ic_created: "ICチップ [$] を作成しました", status_placed: "$ を配置しました", alert_copied: "コピーしました", alert_invalid: "データが無効です", confirm_clear: "本当に全て消去しますか？",
-  },
-  en: {
-    cat_user_chips: "User Chips (IC)", cat_ic_parts: "IC Parts", cat_input: "Input (INPUT)", cat_output: "Output (OUTPUT)", cat_gates: "Logic Gates (GATES)", cat_memory: "Memory / CPU", cat_other: "Others",
-    cat_speed: "Simulation Speed",
-    part_pin_in: "Pin In", part_pin_out: "Pin Out", part_switch: "Switch", part_button: "Button", part_key: "Keyboard Input", part_clock: "Clock",
-    part_led: "LED Lamp", part_color_led: "Color LED", part_hex: "7-Seg (Hex)", part_buzzer: "Buzzer",
-    part_dff: "D Flip-Flop", part_jkff: "JK Flip-Flop", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4bit Counter", part_decoder: "Decoder (3to8)",
-    part_matrix: "Matrix LED", part_color_matrix: "Color Matrix", part_delay: "Delay", part_joint: "Joint", part_label: "Label",
-    btn_create_ic: "⚡ Create IC from Sel", btn_mode_ptr: "👆 Interact", btn_mode_pan: "✋ Pan", btn_mode_sel: "⛝ Select",
-    btn_share: "📋 Share Text Data", btn_save: "💾 Save", btn_open: "📂 Open", btn_clear: "🗑 Clear All",
-    modal_title: "Circuit Data (JSON)", btn_close: "Close", btn_copy: "Copy", btn_load: "Load",
-    placeholder_json: "Paste JSON data here...", default_text: "Text",
-    prompt_rom: "ROM Data (16 Hex values separated by space):", prompt_key: "Assign Key:", confirm_toggle: "Enable Toggle Mode?",
-    prompt_digits: "Digits (1-8):", prompt_rows: "Rows:", prompt_cols: "Cols:", prompt_size: "Total Width (px) (Empty for auto: $px)", prompt_label: "Label / Value:",
-    alert_select_chip: "Please select parts to convert to IC.", prompt_chip_name: "Enter Chip Name:", confirm_no_pins: "No input/output pins selected. Continue?",
-    status_ic_created: "IC Chip [$] created.", status_placed: "Placed $", alert_copied: "Copied to clipboard.", alert_invalid: "Invalid Data.", confirm_clear: "Are you sure you want to clear all?",
-  },
-  zh: {
-    cat_user_chips: "用户芯片 (IC)", cat_ic_parts: "IC 组件", cat_input: "输入 (INPUT)", cat_output: "输出 (OUTPUT)", cat_gates: "逻辑门 (GATES)", cat_memory: "存储器 / CPU", cat_other: "其他",
-    cat_speed: "模拟速度",
-    part_pin_in: "输入引脚 (Pin In)", part_pin_out: "输出引脚 (Pin Out)", part_switch: "开关", part_button: "按钮", part_key: "键盘输入", part_clock: "时钟",
-    part_led: "LED 灯", part_color_led: "彩色 LED", part_hex: "7段数码管 (16进制)", part_buzzer: "蜂鸣器",
-    part_dff: "D 触发器", part_jkff: "JK 触发器", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4位计数器", part_decoder: "译码器 (3to8)",
-    part_matrix: "点阵 LED", part_color_matrix: "彩色点阵", part_delay: "延迟 (Delay)", part_joint: "连接点 (Joint)", part_label: "标签",
-    btn_create_ic: "⚡ 选区转 IC", btn_mode_ptr: "👆 操作", btn_mode_pan: "✋ 移动", btn_mode_sel: "⛝ 选择",
-    btn_share: "📋 分享文本数据", btn_save: "💾 保存", btn_open: "📂 打开", btn_clear: "🗑 清空",
-    modal_title: "电路数据 (JSON)", btn_close: "关闭", btn_copy: "复制", btn_load: "加载",
-    placeholder_json: "在此粘贴 JSON 数据...", default_text: "文本",
-    prompt_rom: "ROM 数据 (16个16进制数，空格分隔):", prompt_key: "分配按键:", confirm_toggle: "启用切换模式吗?",
-    prompt_digits: "位数 (1-8):", prompt_rows: "行数:", prompt_cols: "列数:", prompt_size: "总宽度(px) (留空自动: $px)", prompt_label: "标签 / 值:",
-    alert_select_chip: "请选择要转换为 IC 的元件。", prompt_chip_name: "输入芯片名称:", confirm_no_pins: "未选择输入/输出引脚。继续吗？",
-    status_ic_created: "IC 芯片 [$] 已创建。", status_placed: "已放置 $", alert_copied: "已复制到剪贴板。", alert_invalid: "数据无效。", confirm_clear: "确定要清空所有内容吗？",
-  },
-  es: {
-    cat_user_chips: "Chips de Usuario (IC)", cat_ic_parts: "Partes IC", cat_input: "Entrada (INPUT)", cat_output: "Salida (OUTPUT)", cat_gates: "Puertas Lógicas", cat_memory: "Memoria / CPU", cat_other: "Otros",
-    cat_speed: "Velocidad de Simulación",
-    part_pin_in: "Pin Entrada", part_pin_out: "Pin Salida", part_switch: "Interruptor", part_button: "Botón", part_key: "Entrada Teclado", part_clock: "Reloj",
-    part_led: "Lámpara LED", part_color_led: "LED Color", part_hex: "7-Seg (Hex)", part_buzzer: "Zumbador",
-    part_dff: "Flip-Flop D", part_jkff: "Flip-Flop JK", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "Contador 4bit", part_decoder: "Decodificador (3a8)",
-    part_matrix: "Matriz LED", part_color_matrix: "Matriz Color", part_delay: "Retardo", part_joint: "Unión", part_label: "Etiqueta",
-    btn_create_ic: "⚡ Crear IC", btn_mode_ptr: "👆 Interactuar", btn_mode_pan: "✋ Mover", btn_mode_sel: "⛝ Seleccionar",
-    btn_share: "📋 Compartir Datos", btn_save: "💾 Guardar", btn_open: "📂 Abrir", btn_clear: "🗑 Borrar Todo",
-    modal_title: "Datos del Circuito (JSON)", btn_close: "Cerrar", btn_copy: "Copiar", btn_load: "Cargar",
-    placeholder_json: "Pegar JSON aquí...", default_text: "Texto",
-    prompt_rom: "Datos ROM (16 valores Hex separados por espacio):", prompt_key: "Asignar Tecla:", confirm_toggle: "¿Activar modo interruptor?",
-    prompt_digits: "Dígitos (1-8):", prompt_rows: "Filas:", prompt_cols: "Columnas:", prompt_size: "Ancho Total (px) (Vacío para auto: $px)", prompt_label: "Etiqueta / Valor:",
-    alert_select_chip: "Seleccione partes para convertir a IC.", prompt_chip_name: "Nombre del Chip:", confirm_no_pins: "Sin pines de E/S. ¿Continuar?",
-    status_ic_created: "Chip IC [$] creado.", status_placed: "$ colocado", alert_copied: "Copiado al portapapeles.", alert_invalid: "Datos inválidos.", confirm_clear: "¿Está seguro de borrar todo?",
-  },
-  pt: {
-    cat_user_chips: "Chips do Usuário (IC)", cat_ic_parts: "Peças IC", cat_input: "Entrada (INPUT)", cat_output: "Saída (OUTPUT)", cat_gates: "Portas Lógicas", cat_memory: "Memória / CPU", cat_other: "Outros",
-    cat_speed: "Velocidade de Simulação",
-    part_pin_in: "Pino Entrada", part_pin_out: "Pino Saída", part_switch: "Interruptor", part_button: "Botão", part_key: "Teclado", part_clock: "Clock",
-    part_led: "Lâmpada LED", part_color_led: "LED Colorido", part_hex: "7-Seg (Hex)", part_buzzer: "Buzzer",
-    part_dff: "Flip-Flop D", part_jkff: "Flip-Flop JK", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "Contador 4bit", part_decoder: "Decodificador (3para8)",
-    part_matrix: "Matriz LED", part_color_matrix: "Matriz Colorida", part_delay: "Atraso", part_joint: "Junção", part_label: "Rótulo",
-    btn_create_ic: "⚡ Criar IC", btn_mode_ptr: "👆 Interagir", btn_mode_pan: "✋ Mover", btn_mode_sel: "⛝ Selecionar",
-    btn_share: "📋 Compartilhar Dados", btn_save: "💾 Salvar", btn_open: "📂 Abrir", btn_clear: "🗑 Limpar Tudo",
-    modal_title: "Dados do Circuito (JSON)", btn_close: "Fechar", btn_copy: "Copiar", btn_load: "Carregar",
-    placeholder_json: "Cole o JSON aqui...", default_text: "Texto",
-    prompt_rom: "Dados ROM (16 valores Hex separados por espaço):", prompt_key: "Atribuir Tecla:", confirm_toggle: "Ativar modo alternância?",
-    prompt_digits: "Dígitos (1-8):", prompt_rows: "Linhas:", prompt_cols: "Colunas:", prompt_size: "Largura Total (px) (Vazio para auto: $px)", prompt_label: "Rótulo / Valor:",
-    alert_select_chip: "Selecione peças para converter em IC.", prompt_chip_name: "Nome do Chip:", confirm_no_pins: "Sem pinos de E/S. Continuar?",
-    status_ic_created: "Chip IC [$] criado.", status_placed: "$ colocado", alert_copied: "Copiado para a área de transferência.", alert_invalid: "Dados inválidos.", confirm_clear: "Tem certeza que deseja limpar tudo?",
-  },
-  ko: {
-    cat_user_chips: "사용자 칩 (IC)", cat_ic_parts: "IC 부품", cat_input: "입력 (INPUT)", cat_output: "출력 (OUTPUT)", cat_gates: "논리 게이트", cat_memory: "메모리 / CPU", cat_other: "기타",
-    cat_speed: "시뮬레이션 속도",
-    part_pin_in: "입력 핀", part_pin_out: "출력 핀", part_switch: "스위치", part_button: "버튼", part_key: "키보드 입력", part_clock: "클럭",
-    part_led: "LED 램프", part_color_led: "컬러 LED", part_hex: "7세그먼트 (Hex)", part_buzzer: "부저",
-    part_dff: "D 플립플롭", part_jkff: "JK 플립플롭", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4비트 카운터", part_decoder: "디코더 (3to8)",
-    part_matrix: "매트릭스 LED", part_color_matrix: "컬러 매트릭스", part_delay: "지연 (Delay)", part_joint: "접점", part_label: "라벨",
-    btn_create_ic: "⚡ 선택 영역 IC화", btn_mode_ptr: "👆 조작", btn_mode_pan: "✋ 이동", btn_mode_sel: "⛝ 선택",
-    btn_share: "📋 텍스트 데이터 공유", btn_save: "💾 저장", btn_open: "📂 열기", btn_clear: "🗑 전체 삭제",
-    modal_title: "회로 데이터 (JSON)", btn_close: "닫기", btn_copy: "복사", btn_load: "불러오기",
-    placeholder_json: "여기에 JSON 데이터를 붙여넣으세요...", default_text: "텍스트",
-    prompt_rom: "ROM 데이터 (16진수 16개 공백 구분):", prompt_key: "할당 키:", confirm_toggle: "토글 모드로 설정합니까?",
-    prompt_digits: "자릿수 (1-8):", prompt_rows: "행 (Rows):", prompt_cols: "열 (Cols):", prompt_size: "전체 너비(px) (빈칸 자동: $px)", prompt_label: "라벨 / 값:",
-    alert_select_chip: "IC로 변환할 부품을 선택하세요.", prompt_chip_name: "칩 이름 입력:", confirm_no_pins: "입출력 핀이 없습니다. 계속하시겠습니까?",
-    status_ic_created: "IC 칩 [$] 생성됨", status_placed: "$ 배치됨", alert_copied: "복사되었습니다.", alert_invalid: "데이터가 유효하지 않습니다.", confirm_clear: "정말 모두 삭제하시겠습니까?",
-  }
+ ja: {
+  cat_user_chips: "ユーザー定義チップ (IC)", cat_ic_parts: "IC作成用パーツ", cat_input: "入力 (INPUT)", cat_output: "出力 (OUTPUT)", cat_gates: "論理ゲート (GATES)", cat_memory: "メモリ / CPU", cat_other: "その他",
+  cat_speed: "シミュレーション速度",
+  part_pin_in: "入力ピン (Pin In)", part_pin_out: "出力ピン (Pin Out)", part_switch: "スイッチ", part_button: "ボタン", part_key: "キーボード入力", part_clock: "クロック",
+  part_led: "LEDランプ", part_color_led: "カラーLED", part_hex: "7セグ (16進)", part_buzzer: "ブザー",
+  part_dff: "Dフリップフロップ", part_jkff: "JKフリップフロップ", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4bit カウンタ", part_decoder: "デコーダ (3to8)",
+  part_matrix: "マトリクスLED", part_color_matrix: "カラーマトリクス", part_delay: "遅延 (Delay)", part_joint: "中継点 (Joint)", part_label: "ラベル",
+  btn_create_ic: "⚡ 選択範囲をIC化", btn_mode_ptr: "👆 操作", btn_mode_pan: "✋ 移動", btn_mode_sel: "⛝ 選択",
+  btn_share: "📋 テキストデータ共有", btn_save: "💾 保存", btn_open: "📂 開く", btn_clear: "🗑 全消去",
+  modal_title: "回路データ (JSON)", btn_close: "閉じる", btn_copy: "コピー", btn_load: "読込実行",
+  placeholder_json: "ここにJSONデータを貼り付け...", default_text: "テキスト",
+  prompt_rom: "ROMデータ (16進数 16個 スペース区切り):", prompt_key: "割当キー:", confirm_toggle: "トグルモードにしますか?",
+  prompt_digits: "桁数 (1-8):", prompt_rows: "行数 (Rows):", prompt_cols: "列数 (Cols):", prompt_size: "全体の幅(px)を設定 (空欄で自動: $px にリサイズ)", prompt_label: "ラベル / 値:",
+  alert_select_chip: "チップ化する部品を選択してください", prompt_chip_name: "チップ名を入力:", confirm_no_pins: "入出力ピンが含まれていません。続行しますか？",
+  status_ic_created: "ICチップ [$] を作成しました", status_placed: "$ を配置しました", alert_copied: "コピーしました", alert_invalid: "データが無効です", confirm_clear: "本当に全て消去しますか？",
+ },
+ en: {
+  cat_user_chips: "User Chips (IC)", cat_ic_parts: "IC Parts", cat_input: "Input (INPUT)", cat_output: "Output (OUTPUT)", cat_gates: "Logic Gates (GATES)", cat_memory: "Memory / CPU", cat_other: "Others",
+  cat_speed: "Simulation Speed",
+  part_pin_in: "Pin In", part_pin_out: "Pin Out", part_switch: "Switch", part_button: "Button", part_key: "Keyboard Input", part_clock: "Clock",
+  part_led: "LED Lamp", part_color_led: "Color LED", part_hex: "7-Seg (Hex)", part_buzzer: "Buzzer",
+  part_dff: "D Flip-Flop", part_jkff: "JK Flip-Flop", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4bit Counter", part_decoder: "Decoder (3to8)",
+  part_matrix: "Matrix LED", part_color_matrix: "Color Matrix", part_delay: "Delay", part_joint: "Joint", part_label: "Label",
+  btn_create_ic: "⚡ Create IC from Sel", btn_mode_ptr: "👆 Interact", btn_mode_pan: "✋ Pan", btn_mode_sel: "⛝ Select",
+  btn_share: "📋 Share Text Data", btn_save: "💾 Save", btn_open: "📂 Open", btn_clear: "🗑 Clear All",
+  modal_title: "Circuit Data (JSON)", btn_close: "Close", btn_copy: "Copy", btn_load: "Load",
+  placeholder_json: "Paste JSON data here...", default_text: "Text",
+  prompt_rom: "ROM Data (16 Hex values separated by space):", prompt_key: "Assign Key:", confirm_toggle: "Enable Toggle Mode?",
+  prompt_digits: "Digits (1-8):", prompt_rows: "Rows:", prompt_cols: "Cols:", prompt_size: "Total Width (px) (Empty for auto: $px)", prompt_label: "Label / Value:",
+  alert_select_chip: "Please select parts to convert to IC.", prompt_chip_name: "Enter Chip Name:", confirm_no_pins: "No input/output pins selected. Continue?",
+  status_ic_created: "IC Chip [$] created.", status_placed: "Placed $", alert_copied: "Copied to clipboard.", alert_invalid: "Invalid Data.", confirm_clear: "Are you sure you want to clear all?",
+ },
+ zh: {
+  cat_user_chips: "用户芯片 (IC)", cat_ic_parts: "IC 组件", cat_input: "输入 (INPUT)", cat_output: "输出 (OUTPUT)", cat_gates: "逻辑门 (GATES)", cat_memory: "存储器 / CPU", cat_other: "其他",
+  cat_speed: "模拟速度",
+  part_pin_in: "输入引脚 (Pin In)", part_pin_out: "输出引脚 (Pin Out)", part_switch: "开关", part_button: "按钮", part_key: "键盘输入", part_clock: "时钟",
+  part_led: "LED 灯", part_color_led: "彩色 LED", part_hex: "7段数码管 (16进制)", part_buzzer: "蜂鸣器",
+  part_dff: "D 触发器", part_jkff: "JK 触发器", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4位计数器", part_decoder: "译码器 (3to8)",
+  part_matrix: "点阵 LED", part_color_matrix: "彩色点阵", part_delay: "延迟 (Delay)", part_joint: "连接点 (Joint)", part_label: "标签",
+  btn_create_ic: "⚡ 选区转 IC", btn_mode_ptr: "👆 操作", btn_mode_pan: "✋ 移动", btn_mode_sel: "⛝ 选择",
+  btn_share: "📋 分享文本数据", btn_save: "💾 保存", btn_open: "📂 打开", btn_clear: "🗑 清空",
+  modal_title: "电路数据 (JSON)", btn_close: "关闭", btn_copy: "复制", btn_load: "加载",
+  placeholder_json: "在此粘贴 JSON 数据...", default_text: "文本",
+  prompt_rom: "ROM 数据 (16个16进制数，空格分隔):", prompt_key: "分配按键:", confirm_toggle: "启用切换模式吗?",
+  prompt_digits: "位数 (1-8):", prompt_rows: "行数:", prompt_cols: "列数:", prompt_size: "总宽度(px) (留空自动: $px)", prompt_label: "标签 / 值:",
+  alert_select_chip: "请选择要转换为 IC 的元件。", prompt_chip_name: "输入芯片名称:", confirm_no_pins: "未选择输入/输出引脚。继续吗？",
+  status_ic_created: "IC 芯片 [$] 已创建。", status_placed: "已放置 $", alert_copied: "已复制到剪贴板。", alert_invalid: "数据无效。", confirm_clear: "确定要清空所有内容吗？",
+ },
+ es: {
+  cat_user_chips: "Chips de Usuario (IC)", cat_ic_parts: "Partes IC", cat_input: "Entrada (INPUT)", cat_output: "Salida (OUTPUT)", cat_gates: "Puertas Lógicas", cat_memory: "Memoria / CPU", cat_other: "Otros",
+  cat_speed: "Velocidad de Simulación",
+  part_pin_in: "Pin Entrada", part_pin_out: "Pin Salida", part_switch: "Interruptor", part_button: "Botón", part_key: "Entrada Teclado", part_clock: "Reloj",
+  part_led: "Lámpara LED", part_color_led: "LED Color", part_hex: "7-Seg (Hex)", part_buzzer: "Zumbador",
+  part_dff: "Flip-Flop D", part_jkff: "Flip-Flop JK", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "Contador 4bit", part_decoder: "Decodificador (3a8)",
+  part_matrix: "Matriz LED", part_color_matrix: "Matriz Color", part_delay: "Retardo", part_joint: "Unión", part_label: "Etiqueta",
+  btn_create_ic: "⚡ Crear IC", btn_mode_ptr: "👆 Interactuar", btn_mode_pan: "✋ Mover", btn_mode_sel: "⛝ Seleccionar",
+  btn_share: "📋 Compartir Datos", btn_save: "💾 Guardar", btn_open: "📂 Abrir", btn_clear: "🗑 Borrar Todo",
+  modal_title: "Datos del Circuito (JSON)", btn_close: "Cerrar", btn_copy: "Copiar", btn_load: "Cargar",
+  placeholder_json: "Pegar JSON aquí...", default_text: "Texto",
+  prompt_rom: "Datos ROM (16 valores Hex separados por espacio):", prompt_key: "Asignar Tecla:", confirm_toggle: "¿Activar modo interruptor?",
+  prompt_digits: "Dígitos (1-8):", prompt_rows: "Filas:", prompt_cols: "Columnas:", prompt_size: "Ancho Total (px) (Vacío para auto: $px)", prompt_label: "Etiqueta / Valor:",
+  alert_select_chip: "Seleccione partes para convertir a IC.", prompt_chip_name: "Nombre del Chip:", confirm_no_pins: "Sin pines de E/S. ¿Continuar?",
+  status_ic_created: "Chip IC [$] creado.", status_placed: "$ colocado", alert_copied: "Copiado al portapapeles.", alert_invalid: "Datos inválidos.", confirm_clear: "¿Está seguro de borrar todo?",
+ },
+ pt: {
+  cat_user_chips: "Chips do Usuário (IC)", cat_ic_parts: "Peças IC", cat_input: "Entrada (INPUT)", cat_output: "Saída (OUTPUT)", cat_gates: "Portas Lógicas", cat_memory: "Memória / CPU", cat_other: "Outros",
+  cat_speed: "Velocidade de Simulação",
+  part_pin_in: "Pino Entrada", part_pin_out: "Pino Saída", part_switch: "Interruptor", part_button: "Botão", part_key: "Teclado", part_clock: "Clock",
+  part_led: "Lâmpada LED", part_color_led: "LED Colorido", part_hex: "7-Seg (Hex)", part_buzzer: "Buzzer",
+  part_dff: "Flip-Flop D", part_jkff: "Flip-Flop JK", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "Contador 4bit", part_decoder: "Decodificador (3para8)",
+  part_matrix: "Matriz LED", part_color_matrix: "Matriz Colorida", part_delay: "Atraso", part_joint: "Junção", part_label: "Rótulo",
+  btn_create_ic: "⚡ Criar IC", btn_mode_ptr: "👆 Interagir", btn_mode_pan: "✋ Mover", btn_mode_sel: "⛝ Selecionar",
+  btn_share: "📋 Compartilhar Dados", btn_save: "💾 Salvar", btn_open: "📂 Abrir", btn_clear: "🗑 Limpar Tudo",
+  modal_title: "Dados do Circuito (JSON)", btn_close: "Fechar", btn_copy: "Copiar", btn_load: "Carregar",
+  placeholder_json: "Cole o JSON aqui...", default_text: "Texto",
+  prompt_rom: "Dados ROM (16 valores Hex separados por espaço):", prompt_key: "Atribuir Tecla:", confirm_toggle: "Ativar modo alternância?",
+  prompt_digits: "Dígitos (1-8):", prompt_rows: "Linhas:", prompt_cols: "Colunas:", prompt_size: "Largura Total (px) (Vazio para auto: $px)", prompt_label: "Rótulo / Valor:",
+  alert_select_chip: "Selecione peças para converter em IC.", prompt_chip_name: "Nome do Chip:", confirm_no_pins: "Sem pinos de E/S. Continuar?",
+  status_ic_created: "Chip IC [$] criado.", status_placed: "$ colocado", alert_copied: "Copiado para a área de transferência.", alert_invalid: "Dados inválidos.", confirm_clear: "Tem certeza que deseja limpar tudo?",
+ },
+ ko: {
+  cat_user_chips: "사용자 칩 (IC)", cat_ic_parts: "IC 부품", cat_input: "입력 (INPUT)", cat_output: "출력 (OUTPUT)", cat_gates: "논리 게이트", cat_memory: "메모리 / CPU", cat_other: "기타",
+  cat_speed: "시뮬레이션 속도",
+  part_pin_in: "입력 핀", part_pin_out: "출력 핀", part_switch: "스위치", part_button: "버튼", part_key: "키보드 입력", part_clock: "클럭",
+  part_led: "LED 램프", part_color_led: "컬러 LED", part_hex: "7세그먼트 (Hex)", part_buzzer: "부저",
+  part_dff: "D 플립플롭", part_jkff: "JK 플립플롭", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4비트 카운터", part_decoder: "디코더 (3to8)",
+  part_matrix: "매트릭스 LED", part_color_matrix: "컬러 매트릭스", part_delay: "지연 (Delay)", part_joint: "접점", part_label: "라벨",
+  btn_create_ic: "⚡ 선택 영역 IC화", btn_mode_ptr: "👆 조작", btn_mode_pan: "✋ 이동", btn_mode_sel: "⛝ 선택",
+  btn_share: "📋 텍스트 데이터 공유", btn_save: "💾 저장", btn_open: "열기", btn_clear: "🗑 전체 삭제",
+  modal_title: "회로 데이터 (JSON)", btn_close: "닫기", btn_copy: "복사", btn_load: "불러오기",
+  placeholder_json: "여기에 JSON 데이터를 붙여넣으세요...", default_text: "텍스트",
+  prompt_rom: "ROM 데이터 (16진수 16개 공백 구분):", prompt_key: "할당 키:", confirm_toggle: "토글 모드로 설정합니까?",
+  prompt_digits: "자릿수 (1-8):", prompt_rows: "행 (Rows):", prompt_cols: "열 (Cols):", prompt_size: "전체 너비(px) (빈칸 자동: $px)", prompt_label: "라벨 / 값:",
+  alert_select_chip: "IC로 변환할 부품을 선택하세요.", prompt_chip_name: "칩 이름 입력:", confirm_no_pins: "입출력 핀이 없습니다. 계속하시겠습니까?",
+  status_ic_created: "IC 칩 [$] 생성됨", status_placed: "$ 배치됨", alert_copied: "복사되었습니다.", alert_invalid: "데이터가 유효하지 않습니다.", confirm_clear: "정말 모두 삭제하시겠습니까?",
+ }
 };
 
-let currentLang = 'en';
+let currentLang = 'ja';
 // ブラウザの言語設定を確認
 const navLang = navigator.language.slice(0,2);
 if(TRANSLATIONS[navLang]) currentLang = navLang;
 
 function txt(key, replacement) {
-  let str = TRANSLATIONS[currentLang][key] || TRANSLATIONS['en'][key] || key;
-  if (replacement !== undefined) str = str.replace('$', replacement);
-  return str;
+ let str = TRANSLATIONS[currentLang][key] || TRANSLATIONS['en'][key] || key;
+ if (replacement !== undefined) str = str.replace('$', replacement);
+ return str;
 }
 
 function changeLanguage(lang) {
-  currentLang = lang;
-  updateUIText();
+ currentLang = lang;
+ updateUIText();
 }
 
 function updateUIText() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.getAttribute('data-i18n');
-    // 子要素にアイコンがある場合など、テキストだけ置換したいが簡易的にinnerHTMLで対応
-    // ただしボタンなどはアイコンを含むため、既存のHTML構造を維持しつつテキストノードだけ変えるのが理想だが、
-    // ここでは単純化のため、アイコンを含む定義済みの文字列を使うか、テキストのみ置換する
-    if (k === 'btn_create_ic') el.innerText = txt(k); // 特殊処理
-    else if (el.querySelector('.icon')) {
-        // アイコンがある場合はテキストノードのみ更新（簡易実装）
-        const iconHTML = el.querySelector('.icon').outerHTML;
-        el.innerHTML = iconHTML + " " + txt(k);
-    }
-    else {
-        el.innerText = txt(k);
-    }
-  });
-  document.getElementById('io-text').placeholder = txt('placeholder_json');
-  document.getElementById('lang-select').value = currentLang;
+ document.querySelectorAll('[data-i18n]').forEach(el => {
+  const k = el.getAttribute('data-i18n');
+  if (k === 'btn_create_ic') el.innerText = txt(k);
+  else if (el.querySelector('.icon')) {
+    const iconHTML = el.querySelector('.icon').outerHTML;
+    el.innerHTML = iconHTML + " " + txt(k);
+  }
+  else {
+    el.innerText = txt(k);
+  }
+ });
+ document.getElementById('io-text').placeholder = txt('placeholder_json');
+ document.getElementById('lang-select').value = currentLang;
 }
 
-// --- 初期化 (Super-Speed v6 + Fixes) ---
+// --- 初期化 ---
 const canvas = document.getElementById('circuitCanvas');
 const ctx = canvas.getContext('2d');
 const container = document.getElementById('canvas-container');
 const statusEl = document.getElementById('status-text');
-const audioCtx = new AudioContext();
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const modal = document.getElementById('io-modal');
 const ioText = document.getElementById('io-text');
 
-// 速度変数 (可変に変更)
 let loopsPerFrame = 1; 
 
 function changeSpeed(val) {
-  loopsPerFrame = parseInt(val);
-  document.getElementById('speed-val').innerText = val;
+ loopsPerFrame = parseInt(val);
+ document.getElementById('speed-val').innerText = val;
 }
 
 const GRID = 20;
@@ -345,7 +340,6 @@ let dragOffsets = new Map();
 let tempWire = null;
 let targetPort = null;
 let clipboard = null;
-let isShiftPressed = false;
 let isSpacePressed = false;
 let hasDraggedPart = false;
 let globalTick = 0;
@@ -354,575 +348,574 @@ function toWorld(sx, sy) { return { x: (sx - view.x) / view.scale, y: (sy - view
 function snap(v) { return Math.round(v/GRID)*GRID; }
 
 const STD_DEF = {
-  'Switch': { w:40, h:30, in:0, out:1, color:'#455a64', label:'SW' },
-  'Button': { w:40, h:30, in:0, out:1, color:'#b71c1c', label:'BTN' },
-  'KeyInput': { w:60, h:30, in:0, out:1, color:'#d32f2f', label:'KEY' },
-  'Clock': { w:40, h:30, in:0, out:1, color:'#00695c', label:'CLK' },
-  'PinIn': { w:30, h:30, in:0, out:1, color:'#f57f17', label:'IN' },
-  'PinOut': { w:30, h:30, in:1, out:0, color:'#fbc02d', label:'OUT' },
-  'LED': { w:30, h:30, in:1, out:0, color:'#263238', label:'LED' },
-  'ColorLED': { w:40, h:40, in:3, out:0, color:'#263238', label:'RGB' },
-  'Buzzer': { w:40, h:40, in:1, out:0, color:'#3e2723', label:'Bz' },
-  'HexDisp': { w:50, h:70, in:4, out:0, color:'#212121', label:'' },
-  'Matrix': { w:100, h:100, in:16, out:0, color:'#000', label:'' },
-  'ColorMatrix':{ w:120, h:100, in:32, out:0, color:'#000', label:'' },
-  'AND': { w:50, h:35, in:2, out:1, color:'#1565c0', label:'AND' },
-  'OR': { w:50, h:35, in:2, out:1, color:'#7b1fa2', label:'OR' },
-  'NOT': { w:50, h:35, in:1, out:1, color:'#ad1457', label:'NOT' },
-  'NAND': { w:50, h:35, in:2, out:1, color:'#e65100', label:'NAND' },
-  'XOR': { w:50, h:35, in:2, out:1, color:'#4527a0', label:'XOR' },
-  'D-FF': { w:50, h:50, in:2, out:2, color:'#00838f', label:'D-FF' },
-  'JK-FF': { w:50, h:70, in:3, out:2, color:'#00838f', label:'JK-FF' },
-  'SR-FF': { w:50, h:70, in:3, out:2, color:'#00838f', label:'SR-FF' },
-  'Counter': { w:60, h:50, in:2, out:4, color:'#4a148c', label:'CNT' },
-  'Decoder': { w:50, h:100, in:3, out:8, color:'#33691e', label:'DEC' },
-  'RAM': { w:100, h:120, in:10, out:4, color:'#37474f', label:'RAM' },
-  'ROM': { w:100, h:100, in:4, out:4, color:'#37474f', label:'ROM' },
-  'Delay': { w:40, h:30, in:1, out:1, color:'#5e35b1', label:'DLY' },
-  'Joint': { w:20, h:20, in:1, out:1, color:'#9e9e9e', label:'' },
-  'Label': { w:100, h:20, in:0, out:0, color:'transparent', label:'Text' }
+ 'Switch': { w:40, h:30, in:0, out:1, color:'#455a64', label:'SW' },
+ 'Button': { w:40, h:30, in:0, out:1, color:'#b71c1c', label:'BTN' },
+ 'KeyInput': { w:60, h:30, in:0, out:1, color:'#d32f2f', label:'KEY' },
+ 'Clock': { w:40, h:30, in:0, out:1, color:'#00695c', label:'CLK' },
+ 'PinIn': { w:30, h:30, in:0, out:1, color:'#f57f17', label:'IN' },
+ 'PinOut': { w:30, h:30, in:1, out:0, color:'#fbc02d', label:'OUT' },
+ 'LED': { w:30, h:30, in:1, out:0, color:'#263238', label:'LED' },
+ 'ColorLED': { w:40, h:40, in:3, out:0, color:'#263238', label:'RGB' },
+ 'Buzzer': { w:40, h:40, in:1, out:0, color:'#3e2723', label:'Bz' },
+ 'HexDisp': { w:50, h:70, in:4, out:0, color:'#212121', label:'' },
+ 'Matrix': { w:100, h:100, in:16, out:0, color:'#000', label:'' },
+ 'ColorMatrix':{ w:120, h:100, in:32, out:0, color:'#000', label:'' },
+ 'AND': { w:50, h:35, in:2, out:1, color:'#1565c0', label:'AND' },
+ 'OR': { w:50, h:35, in:2, out:1, color:'#7b1fa2', label:'OR' },
+ 'NOT': { w:50, h:35, in:1, out:1, color:'#ad1457', label:'NOT' },
+ 'NAND': { w:50, h:35, in:2, out:1, color:'#e65100', label:'NAND' },
+ 'XOR': { w:50, h:35, in:2, out:1, color:'#4527a0', label:'XOR' },
+ 'D-FF': { w:50, h:50, in:2, out:2, color:'#00838f', label:'D-FF' },
+ 'JK-FF': { w:50, h:70, in:3, out:2, color:'#00838f', label:'JK-FF' },
+ 'SR-FF': { w:50, h:70, in:3, out:2, color:'#00838f', label:'SR-FF' },
+ 'Counter': { w:60, h:50, in:2, out:4, color:'#4a148c', label:'CNT' },
+ 'Decoder': { w:50, h:100, in:3, out:8, color:'#33691e', label:'DEC' },
+ 'RAM': { w:100, h:120, in:10, out:4, color:'#37474f', label:'RAM' },
+ 'ROM': { w:100, h:100, in:4, out:4, color:'#37474f', label:'ROM' },
+ 'Delay': { w:40, h:30, in:1, out:1, color:'#5e35b1', label:'DLY' },
+ 'Joint': { w:20, h:20, in:1, out:1, color:'#9e9e9e', label:'' },
+ 'Label': { w:100, h:20, in:0, out:0, color:'transparent', label:'Text' }
 };
 
 class Part {
-  constructor(type, x, y) {
-    this.id = 'p_' + Date.now() + '_' + Math.floor(Math.random()*100000);
-    this.type = type;
-    this.x = snap(x);
-    this.y = snap(y);
-    
-    if (customDefs[type]) {
-      this.isCustom = true;
-      this.def = customDefs[type];
-      this.internalState = this.initCustomState(this.def);
+ constructor(type, x, y) {
+  this.id = 'p_' + Date.now() + '_' + Math.floor(Math.random()*100000);
+  this.type = type;
+  this.x = snap(x);
+  this.y = snap(y);
+   
+  if (customDefs[type]) {
+   this.isCustom = true;
+   this.def = customDefs[type];
+   this.internalState = this.initCustomState(this.def);
+  } else {
+   this.isCustom = false;
+   this.def = Object.assign({}, STD_DEF[type] || {w:40, h:40, in:0, out:0, color:'#555'});
+  }
+  this.w = this.def.w;
+  this.h = this.def.h;
+  this.label = this.def.label || type;
+  if(type==='Joint') this.label = '';
+
+  if (type === 'HexDisp') { this.digits = 1; }
+  if (type === 'Matrix' || type === 'ColorMatrix') { this.rows = 8; this.cols = 8; this.gridState = null; }
+
+  this.inputs = new Array(this.def.in).fill(false);
+  this.outputs = new Array(this.def.out).fill(false);
+  this.active = false;
+  this.value = 0;
+
+  if (type==='Clock') { this.interval=10; this.lastToggle=0; }
+  if (type==='KeyInput') { this.assignedKey='a'; this.isToggleMode=false; this.isKeyPressed=false; }
+  if (['D-FF','JK-FF','SR-FF','Counter'].includes(type) || type==='RAM') { this.state=false; this.lastClk=false; }
+  if (type==='RAM') { this.data=new Array(16).fill(0); }
+  if (type==='ROM') { this.data=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]; }
+  if (type==='Delay') { this.delayTime=100; this.queue=[]; this.lastInput=false; }
+  if (type==='Buzzer') { this.freq=440; }
+  if (type==='Label') { this.label=txt('default_text'); }
+ }
+
+ initCustomState(def) {
+  const map = {};
+  const parts = def.parts.map(p => {
+   const np = new Part(p.type, 0, 0);
+   Object.assign(np, p);
+   np.inputs = new Array(np.def.in).fill(false);
+   np.outputs = new Array(np.def.out).fill(false);
+   if(np.type==='RAM') np.data = new Array(16).fill(0);
+   map[p.id] = np;
+   return np;
+  });
+  const wires = def.wires.map(w => ({
+   source: map[w.srcId],
+   sourceIdx: w.srcIdx,
+   target: map[w.tgtId],
+   targetIdx: w.tgtIdx
+  })).filter(w => w.source && w.target);
+
+  const inPins = parts.filter(p => p.type==='PinIn').sort((a,b)=>a.y-b.y);
+  const outPins = parts.filter(p => p.type==='PinOut').sort((a,b)=>a.y-b.y);
+  return { parts, wires, inPins, outPins };
+ }
+
+ update(tick) {
+  for(let i=0; i<this.inputs.length; i++) {
+   const w = wires.find(w => w.target === this && w.targetIdx === i);
+   this.inputs[i] = w ? w.source.outputs[w.sourceIdx] : false;
+  }
+  if(this.isCustom) this.updateCustom(tick);
+  else this.updateStandard(tick);
+ }
+
+ updateCustom(tick) {
+  const S = this.internalState;
+  for(let i=0; i<this.inputs.length; i++) {
+   if(S.inPins[i]) {
+    S.inPins[i].outputs[0] = this.inputs[i];
+    S.inPins[i].active = this.inputs[i];
+   }
+  }
+  S.parts.forEach(p => p.updateInternal(S.wires, tick));
+  for(let i=0; i<this.outputs.length; i++) {
+   if(S.outPins[i]) {
+    this.outputs[i] = S.outPins[i].inputs[0];
+   }
+  }
+ }
+
+ updateInternal(localWires, tick) {
+  for(let i=0; i<this.def.in; i++) {
+   const w = localWires.find(w => w.target === this && w.targetIdx === i);
+   this.inputs[i] = w ? w.source.outputs[w.sourceIdx] : false;
+  }
+  if(this.isCustom) this.updateCustom(tick);
+  else this.updateStandard(tick);
+ }
+
+ updateStandard(tick) {
+  const ins = this.inputs;
+  switch(this.type) {
+   case 'Switch': case 'Button': case 'KeyInput': case 'PinIn': case 'PinOut': case 'Label': break;
+   case 'Joint': this.outputs[0] = ins[0]; break;
+   case 'Clock': 
+    if(tick - this.lastToggle >= (this.interval || 1)) {
+     this.active = !this.active;
+     this.lastToggle = tick;
+    }
+    this.outputs[0]=this.active;
+    break;
+   case 'AND': this.outputs[0] = ins[0] && ins[1]; break;
+   case 'OR': this.outputs[0] = ins[0] || ins[1]; break;
+   case 'NOT': this.outputs[0] = !ins[0]; break;
+   case 'NAND':this.outputs[0] = !(ins[0] && ins[1]); break;
+   case 'XOR': this.outputs[0] = (ins[0] !== ins[1]); break;
+   case 'LED': this.active = ins[0]; break;
+   case 'ColorLED': this.active = ins[0]||ins[1]||ins[2]; break;
+   case 'Buzzer': this.active = ins[0]; this.updateAudio(); break;
+   case 'Delay': {
+    if(ins[0]!==this.lastInput){
+     this.queue.push({v:ins[0], t:tick+this.delayTime});
+     this.lastInput=ins[0];
+    }
+    while(this.queue.length>0 && tick>=this.queue[0].t) {
+     this.active=this.queue.shift().v;
+    }
+    this.outputs[0]=this.active;
+    break;
+   }
+   case 'D-FF':
+    if(!this.lastClk && ins[1]) { this.state=ins[0]; }
+    this.lastClk=ins[1];
+    this.outputs[0]=this.state; this.outputs[1]=!this.state;
+    break;
+   case 'JK-FF':
+    if(!this.lastClk && ins[2]) {
+     if(ins[0]&&!ins[1]) this.state=true;
+     else if(!ins[0]&&ins[1]) this.state=false;
+     else if(ins[0]&&ins[1]) this.state=!this.state;
+    }
+    this.lastClk=ins[2];
+    this.outputs[0]=this.state; this.outputs[1]=!this.state;
+    break;
+   case 'SR-FF':
+    if(!this.lastClk && ins[2]) {
+      if(ins[0]) this.state=true;
+      else if(ins[1]) this.state=false;
+    }
+    this.lastClk=ins[2];
+    this.outputs[0]=this.state; this.outputs[1]=!this.state;
+    break;
+   case 'Counter':
+    if(ins[1]) this.value=0;
+    else if(!this.lastClk && ins[0]) this.value=(this.value+1)%16;
+    this.lastClk=ins[0];
+    this.outputs[0]=(this.value&1)!=0;
+    this.outputs[1]=(this.value&2)!=0;
+    this.outputs[2]=(this.value&4)!=0;
+    this.outputs[3]=(this.value&8)!=0;
+    break;
+   case 'Decoder': {
+    const a=(ins[0]?1:0)+(ins[1]?2:0)+(ins[2]?4:0);
+    for(let i=0;i<8;i++) this.outputs[i]=(i===a);
+    break;
+   }
+   case 'RAM': {
+    const wd=(ins[0]?1:0)+(ins[1]?2:0)+(ins[2]?4:0)+(ins[3]?8:0);
+    const wa=(ins[4]?1:0)+(ins[5]?2:0)+(ins[6]?4:0)+(ins[7]?8:0);
+    if(!this.lastClk && ins[9] && ins[8]) this.data[wa]=wd;
+    this.lastClk=ins[9];
+    const rv=this.data[wa];
+    this.outputs[0]=(rv&1)!=0;
+    this.outputs[1]=(rv&2)!=0;
+    this.outputs[2]=(rv&4)!=0;
+    this.outputs[3]=(rv&8)!=0;
+    break;
+   }
+   case 'ROM': {
+    const ra=(ins[0]?1:0)+(ins[1]?2:0)+(ins[2]?4:0)+(ins[3]?8:0);
+    const ro=this.data[ra]||0;
+    this.outputs[0]=(ro&1)!=0;
+    this.outputs[1]=(ro&2)!=0;
+    this.outputs[2]=(ro&4)!=0;
+    this.outputs[3]=(ro&8)!=0;
+    break;
+   }
+   case 'HexDisp': break;
+   case 'Matrix': case 'ColorMatrix': {
+    const totalPixels = this.rows * this.cols;
+    if (!this.gridState || this.gridState.length !== totalPixels) {
+     if(this.type === 'Matrix') this.gridState = new Array(totalPixels).fill(0);
+     else this.gridState = new Array(totalPixels).fill(null).map(()=>({r:0,g:0,b:0}));
+    }
+    if (this.type === 'Matrix') {
+     for(let r=0; r<this.rows; r++) {
+      if (this.inputs[r]) {
+       for(let c=0; c<this.cols; c++) {
+        if (this.inputs[this.rows + c]) {
+         this.gridState[r*this.cols + c] = 1.0;
+        }
+       }
+      }
+     }
     } else {
-      this.isCustom = false;
-      this.def = Object.assign({}, STD_DEF[type] || {w:40, h:40, in:0, out:0, color:'#555'});
+     const startR = this.rows;
+     const startG = this.rows + this.cols;
+     const startB = this.rows + this.cols * 2;
+     for(let r=0; r<this.rows; r++) {
+      if (this.inputs[r]) {
+       for(let c=0; c<this.cols; c++) {
+        const idx = r*this.cols + c;
+        if(this.inputs[startR + c]) this.gridState[idx].r = 1.0;
+        if(this.inputs[startG + c]) this.gridState[idx].g = 1.0;
+        if(this.inputs[startB + c]) this.gridState[idx].b = 1.0;
+       }
+      }
+     }
     }
-    this.w = this.def.w;
-    this.h = this.def.h;
-    this.label = this.def.label || type;
-    if(type==='Joint') this.label = '';
+    break;
+   }
+  }
+  if(['AND','OR','NOT','NAND','XOR'].includes(this.type)) this.active=this.outputs[0];
+  if(['Switch','Button','KeyInput','PinIn'].includes(this.type)) this.outputs[0]=this.active;
+ }
 
-    if (type === 'HexDisp') { this.digits = 1; }
-    if (type === 'Matrix' || type === 'ColorMatrix') { this.rows = 8; this.cols = 8; this.gridState = null; }
+ updateAudio() {
+  if(this.active) {
+   if(!this.oscillator) {
+    this.oscillator=audioCtx.createOscillator();
+    this.gainNode=audioCtx.createGain();
+    this.oscillator.type='square';
+    this.oscillator.frequency.setValueAtTime(this.freq,audioCtx.currentTime);
+    this.gainNode.gain.value=0.05;
+    this.oscillator.connect(this.gainNode);
+    this.gainNode.connect(audioCtx.destination);
+    this.oscillator.start();
+   }
+  } else {
+   if(this.oscillator){
+    try { this.oscillator.stop(); } catch(e){}
+    this.oscillator.disconnect();
+    this.gainNode.disconnect();
+    this.oscillator=null;
+   }
+  }
+ }
 
-    this.inputs = new Array(this.def.in).fill(false);
-    this.outputs = new Array(this.def.out).fill(false);
-    this.active = false;
-    this.value = 0;
+ draw() {
+  const isSel = selectedParts.includes(this);
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 3;
 
-    if (type==='Clock') { this.interval=10; this.lastToggle=0; }
-    if (type==='KeyInput') { this.assignedKey='a'; this.isToggleMode=false; this.isKeyPressed=false; }
-    if (['D-FF','JK-FF','SR-FF','Counter'].includes(type) || type==='RAM') { this.state=false; this.lastClk=false; }
-    if (type==='RAM') { this.data=new Array(16).fill(0); }
-    if (type==='ROM') { this.data=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]; }
-    if (type==='Delay') { this.delayTime=100; this.queue=[]; this.lastInput=false; }
-    if (type==='Buzzer') { this.freq=440; }
-    if (type==='Label') { this.label=txt('default_text'); }
+  if(this.type==='Label') {
+   ctx.fillStyle = isSel ? 'rgba(255,255,255,0.1)' : 'transparent';
+   ctx.strokeStyle = isSel ? COLORS.select : 'transparent';
+   ctx.shadowColor = 'transparent';
+  } else if(this.type==='Matrix' || this.type==='ColorMatrix') {
+   ctx.fillStyle='#000';
+   ctx.strokeStyle = isSel ? COLORS.select : '#333';
+   const decay = 0.85;
+   const total = (this.rows||8) * (this.cols||8);
+   if(this.type==='Matrix') {
+    for(let i=0;i<total;i++) if(this.gridState[i]) this.gridState[i] *= decay;
+   } else {
+    for(let i=0;i<total;i++) {
+     this.gridState[i].r *= decay;
+     this.gridState[i].g *= decay;
+     this.gridState[i].b *= decay;
+    }
+   }
+  } else if(this.isCustom || this.type==='RAM' || this.type==='ROM') {
+   ctx.fillStyle=this.def.color||'#333';
+   ctx.strokeStyle = isSel ? COLORS.select : '#000';
+  } else if(this.type==='Joint') {
+   ctx.fillStyle = '#bbb';
+   ctx.strokeStyle = isSel ? COLORS.select : '#555';
+  } else {
+   ctx.fillStyle = this.def.color;
+   if((this.type==='Button' || this.type==='KeyInput') && this.active) ctx.fillStyle='#ff5252';
+   ctx.strokeStyle = isSel ? COLORS.select : '#000';
   }
 
-  initCustomState(def) {
-    const map = {};
-    const parts = def.parts.map(p => {
-      const np = new Part(p.type, 0, 0);
-      Object.assign(np, p);
-      np.inputs = new Array(np.def.in).fill(false);
-      np.outputs = new Array(np.def.out).fill(false);
-      if(np.type==='RAM') np.data = new Array(16).fill(0);
-      map[p.id] = np;
-      return np;
-    });
-    const wires = def.wires.map(w => ({
-      source: map[w.srcId],
-      sourceIdx: w.srcIdx,
-      target: map[w.tgtId],
-      targetIdx: w.tgtIdx
-    })).filter(w => w.source && w.target);
-
-    const inPins = parts.filter(p => p.type==='PinIn').sort((a,b)=>a.y-b.y);
-    const outPins = parts.filter(p => p.type==='PinOut').sort((a,b)=>a.y-b.y);
-    return { parts, wires, inPins, outPins };
+  if(this.type === 'Joint') {
+   ctx.beginPath();
+   ctx.arc(this.x+this.w/2, this.y+this.h/2, 6, 0, Math.PI*2);
+   ctx.fill();
+   ctx.stroke();
+  } else {
+   ctx.beginPath();
+   ctx.roundRect(this.x, this.y, this.w, this.h, 4);
+   ctx.fill();
+   ctx.shadowBlur=0; 
+   ctx.shadowOffsetY=0;
+   ctx.lineWidth = isSel ? 2 : 1;
+   if(this.type!=='Label' || isSel) ctx.stroke();
   }
 
-  update(tick) {
-    for(let i=0; i<this.inputs.length; i++) {
-      const w = wires.find(w => w.target === this && w.targetIdx === i);
-      this.inputs[i] = w ? w.source.outputs[w.sourceIdx] : false;
+  ctx.fillStyle='#fff';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+
+  if(this.isCustom || this.type==='RAM' || this.type==='ROM' || this.type==='D-FF') {
+   ctx.font='bold 12px sans-serif';
+   ctx.fillText(this.label, this.x+this.w/2, this.y+this.h/2);
+   if(this.type==='RAM') {
+    ctx.fillStyle='#aaa'; ctx.font='9px sans-serif';
+    ctx.textAlign='left'; ctx.fillText('D', this.x+2, this.y+40); ctx.fillText('A', this.x+2, this.y+75); ctx.fillText('WE', this.x+2, this.y+110);
+    ctx.textAlign='right'; ctx.fillText('Q', this.x+this.w-2, this.y+60);
+   }
+  } else if(this.type==='HexDisp') {
+   const segsDat=[[1,1,1,1,1,1,0],[0,1,1,0,0,0,0],[1,1,0,1,1,0,1],[1,1,1,1,0,0,1],[0,1,1,0,0,1,1],[1,0,1,1,0,1,1],[1,0,1,1,1,1,1],[1,1,1,0,0,0,0],[1,1,1,1,1,1,1],[1,1,1,1,0,1,1],[1,1,1,0,1,1,1],[0,0,1,1,1,1,1],[1,0,0,1,1,1,0],[0,1,1,1,1,0,1],[1,0,0,1,1,1,1],[1,0,0,0,1,1,1]];
+   const digits = this.digits || 1;
+   const oneW = this.w / digits;
+   for(let d=0; d<digits; d++) {
+    const idx = d * 4;
+    const val = (this.inputs[idx]?8:0)+(this.inputs[idx+1]?4:0)+(this.inputs[idx+2]?2:0)+(this.inputs[idx+3]?1:0);
+    const segs = segsDat[val];
+    const cx = this.x + this.w - (oneW/2) - (d * oneW);
+    const cy = this.y + this.h/2;
+    const s = Math.min(8, oneW/4);
+    ctx.lineWidth=3; ctx.lineCap='round';
+    const dl=(x1,y1,x2,y2,on)=>{ ctx.strokeStyle=on?'#f00':'#311'; ctx.beginPath();ctx.moveTo(cx+x1,cy+y1);ctx.lineTo(cx+x2,cy+y2);ctx.stroke();};
+    dl(-s,-2*s,s,-2*s,segs[0]); dl(s,-2*s,s,0,segs[1]); dl(s,0,s,2*s,segs[2]);
+    dl(-s,2*s,s,2*s,segs[3]); dl(-s,0,-s,2*s,segs[4]); dl(-s,-2*s,-s,0,segs[5]); dl(-s,0,s,0,segs[6]);
+   }
+  } else if(this.type==='Matrix') {
+   const R = this.rows || 8;
+   const C = this.cols || 8;
+   const pad = 5;
+   const rSize = (this.h - pad*2) / R;
+   const cSize = (this.w - pad*2) / C;
+   const rad = Math.min(rSize, cSize) * 0.35;
+   const gs = this.gridState || new Array(R*C).fill(0);
+   for(let y=0; y<R; y++) {
+    for(let x=0; x<C; x++) {
+     const val = gs[y*C + x];
+     ctx.beginPath();
+     ctx.arc(this.x + pad + x*cSize + cSize/2, this.y + pad + y*rSize + rSize/2, rad, 0, Math.PI*2);
+     ctx.fillStyle = val > 0.1 ? `rgba(255,0,0,${Math.min(1, val)})` : '#311';
+     ctx.fill();
     }
-    if(this.isCustom) this.updateCustom(tick);
-    else this.updateStandard(tick);
+   }
+  } else if(this.type==='ColorMatrix') {
+   const R = this.rows || 8;
+   const C = this.cols || 8;
+   const pad = 5;
+   const rSize = (this.h - pad*2) / R;
+   const cSize = (this.w - pad*2) / C;
+   const rad = Math.min(rSize, cSize) * 0.35;
+   const gs = this.gridState || new Array(R*C).fill(0).map(()=>({r:0,g:0,b:0}));
+   for(let y=0; y<R; y++) {
+    for(let x=0; x<C; x++) {
+     const p = gs[y*C + x];
+     ctx.beginPath();
+     ctx.arc(this.x + pad + x*cSize + cSize/2, this.y + pad + y*rSize + rSize/2, rad, 0, Math.PI*2);
+     if (p && (p.r > 0.1 || p.g > 0.1 || p.b > 0.1)) {
+      const r = Math.min(255, Math.floor(p.r*255));
+      const g = Math.min(255, Math.floor(p.g*255));
+      const b = Math.min(255, Math.floor(p.b*255));
+      ctx.fillStyle = `rgb(${},${},${})`;
+     } else {
+      ctx.fillStyle = '#111';
+     }
+     ctx.fill();
+    }
+   }
+  } else if(this.type==='Label') {
+   ctx.textAlign='left';ctx.font='14px sans-serif';ctx.fillText(this.label, this.x+5, this.y+10);
+  } else if(this.type!=='Joint') {
+   ctx.font='bold 11px sans-serif';
+   let t = this.label;
+   if(this.type==='KeyInput') t=`[${this.assignedKey.toUpperCase()}]`;
+   if(view.scale>0.5) ctx.fillText(t, this.x+this.w/2, this.y+this.h/2);
   }
 
-  updateCustom(tick) {
-    const S = this.internalState;
-    for(let i=0; i<this.inputs.length; i++) {
-      if(S.inPins[i]) {
-        S.inPins[i].outputs[0] = this.inputs[i];
-        S.inPins[i].active = this.inputs[i];
-      }
-    }
-    S.parts.forEach(p => p.updateInternal(S.wires, tick));
-    for(let i=0; i<this.outputs.length; i++) {
-      if(S.outPins[i]) {
-        this.outputs[i] = S.outPins[i].inputs[0];
-      }
-    }
+  if(this.type==='LED' && this.active) {
+   ctx.fillStyle='#ffeb3b';
+   ctx.beginPath(); ctx.arc(this.x+this.w/2, this.y+this.h/2, 10, 0, Math.PI*2); ctx.fill();
+  }
+  if(this.type==='ColorLED' && this.active) {
+   const r=this.inputs[0]?255:0, g=this.inputs[1]?255:0, b=this.inputs[2]?255:0;
+   ctx.fillStyle=`rgb(${},${},${})`;
+   ctx.beginPath(); ctx.arc(this.x+this.w/2, this.y+this.h/2, 12, 0, Math.PI*2); ctx.fill();
   }
 
-  updateInternal(localWires, tick) {
-    for(let i=0; i<this.def.in; i++) {
-      const w = localWires.find(w => w.target === this && w.targetIdx === i);
-      this.inputs[i] = w ? w.source.outputs[w.sourceIdx] : false;
-    }
-    if(this.isCustom) this.updateCustom(tick);
-    else this.updateStandard(tick);
+  if(view.scale>0.3 && this.type!=='Label') {
+   const drawP = (isIn, i) => {
+    const pos = this.getPortPos(isIn, i);
+    ctx.beginPath();ctx.arc(pos.x, pos.y, 3/view.scale, 0, Math.PI*2);
+    const on = (isIn ? this.inputs[i] : this.outputs[i]);
+    ctx.fillStyle = on ? COLORS.wireOn : COLORS.wireOff;
+    if(this.type==='Joint') ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.fill();
+   };
+   const inCount = this.inputs.length;
+   const outCount = this.outputs.length;
+   for(let i=0; i<inCount; i++) drawP(true, i);
+   for(let i=0; i<outCount; i++) drawP(false, i);
   }
+  ctx.restore();
+ }
 
-  updateStandard(tick) {
-    const ins = this.inputs;
-    switch(this.type) {
-      case 'Switch': case 'Button': case 'KeyInput': case 'PinIn': case 'PinOut': case 'Label': break;
-      case 'Joint': this.outputs[0] = ins[0]; break;
-      case 'Clock': 
-        if(tick - this.lastToggle >= (this.interval || 1)) {
-          this.active = !this.active;
-          this.lastToggle = tick;
-        }
-        this.outputs[0]=this.active;
-        break;
-      case 'AND': this.outputs[0] = ins[0] && ins[1]; break;
-      case 'OR':  this.outputs[0] = ins[0] || ins[1]; break;
-      case 'NOT': this.outputs[0] = !ins[0]; break;
-      case 'NAND':this.outputs[0] = !(ins[0] && ins[1]); break;
-      case 'XOR': this.outputs[0] = (ins[0] !== ins[1]); break;
-      case 'LED': this.active = ins[0]; break;
-      case 'ColorLED': this.active = ins[0]||ins[1]||ins[2]; break;
-      case 'Buzzer': this.active = ins[0]; this.updateAudio(); break;
-      case 'Delay': {
-        if(ins[0]!==this.lastInput){
-          this.queue.push({v:ins[0], t:tick+this.delayTime});
-          this.lastInput=ins[0];
-        }
-        while(this.queue.length>0 && tick>=this.queue[0].t) {
-          this.active=this.queue.shift().v;
-        }
-        this.outputs[0]=this.active;
-        break;
-      }
-      case 'D-FF':
-        if(!this.lastClk && ins[1]) { this.state=ins[0]; }
-        this.lastClk=ins[1];
-        this.outputs[0]=this.state; this.outputs[1]=!this.state;
-        break;
-      case 'JK-FF':
-        if(!this.lastClk && ins[2]) {
-          if(ins[0]&&!ins[1]) this.state=true;
-          else if(!ins[0]&&ins[1]) this.state=false;
-          else if(ins[0]&&ins[1]) this.state=!this.state;
-        }
-        this.lastClk=ins[2];
-        this.outputs[0]=this.state; this.outputs[1]=!this.state;
-        break;
-      case 'SR-FF':
-        if(!this.lastClk && ins[2]) {
-            if(ins[0]) this.state=true;
-            else if(ins[1]) this.state=false;
-        }
-        this.lastClk=ins[2];
-        this.outputs[0]=this.state; this.outputs[1]=!this.state;
-        break;
-      case 'Counter':
-        if(ins[1]) this.value=0;
-        else if(!this.lastClk && ins[0]) this.value=(this.value+1)%16;
-        this.lastClk=ins[0];
-        this.outputs[0]=(this.value&1)!=0;
-        this.outputs[1]=(this.value&2)!=0;
-        this.outputs[2]=(this.value&4)!=0;
-        this.outputs[3]=(this.value&8)!=0;
-        break;
-      case 'Decoder': {
-        const a=(ins[0]?1:0)+(ins[1]?2:0)+(ins[2]?4:0);
-        for(let i=0;i<8;i++) this.outputs[i]=(i===a);
-        break;
-      }
-      case 'RAM': {
-        const wd=(ins[0]?1:0)+(ins[1]?2:0)+(ins[2]?4:0)+(ins[3]?8:0);
-        const wa=(ins[4]?1:0)+(ins[5]?2:0)+(ins[6]?4:0)+(ins[7]?8:0);
-        if(!this.lastClk && ins[9] && ins[8]) this.data[wa]=wd;
-        this.lastClk=ins[9];
-        const rv=this.data[wa];
-        this.outputs[0]=(rv&1)!=0;
-        this.outputs[1]=(rv&2)!=0;
-        this.outputs[2]=(rv&4)!=0;
-        this.outputs[3]=(rv&8)!=0;
-        break;
-      }
-      case 'ROM': {
-        const ra=(ins[0]?1:0)+(ins[1]?2:0)+(ins[2]?4:0)+(ins[3]?8:0);
-        const ro=this.data[ra]||0;
-        this.outputs[0]=(ro&1)!=0;
-        this.outputs[1]=(ro&2)!=0;
-        this.outputs[2]=(ro&4)!=0;
-        this.outputs[3]=(ro&8)!=0;
-        break;
-      }
-      case 'HexDisp': break;
-      case 'Matrix': case 'ColorMatrix': {
-        const totalPixels = this.rows * this.cols;
-        if (!this.gridState || this.gridState.length !== totalPixels) {
-          if(this.type === 'Matrix') this.gridState = new Array(totalPixels).fill(0);
-          else this.gridState = new Array(totalPixels).fill(null).map(()=>({r:0,g:0,b:0}));
-        }
-        if (this.type === 'Matrix') {
-          for(let r=0; r<this.rows; r++) {
-            if (this.inputs[r]) {
-              for(let c=0; c<this.cols; c++) {
-                if (this.inputs[this.rows + c]) {
-                  this.gridState[r*this.cols + c] = 1.0;
-                }
-              }
-            }
-          }
-        } else {
-            // Color Matrix
-            const startR = this.rows;
-            const startG = this.rows + this.cols;
-            const startB = this.rows + this.cols * 2;
-            for(let r=0; r<this.rows; r++) {
-                if (this.inputs[r]) {
-                    for(let c=0; c<this.cols; c++) {
-                        const idx = r*this.cols + c;
-                        if(this.inputs[startR + c]) this.gridState[idx].r = 1.0;
-                        if(this.inputs[startG + c]) this.gridState[idx].g = 1.0;
-                        if(this.inputs[startB + c]) this.gridState[idx].b = 1.0;
-                    }
-                }
-            }
-        }
-        break;
-      }
-    }
-    if(['AND','OR','NOT','NAND','XOR'].includes(this.type)) this.active=this.outputs[0];
-    if(['Switch','Button','KeyInput','PinIn'].includes(this.type)) this.outputs[0]=this.active;
+ getPortPos(isInput, idx) {
+  if(this.type==='Matrix' && isInput) {
+   const R = this.rows || 8;
+   const C = this.cols || 8;
+   if(idx < R) { // Row
+    const step = this.h / (R + 1);
+    return {x:this.x, y:this.y + step*(idx+1)};
+   } else { // Col
+    const colIdx = idx - R;
+    const step = this.w / (C + 1);
+    return {x:this.x + step*(colIdx+1), y:this.y+this.h};
+   }
   }
-
-  updateAudio() {
-    if(this.active) {
-      if(!this.oscillator) {
-        this.oscillator=audioCtx.createOscillator();
-        this.gainNode=audioCtx.createGain();
-        this.oscillator.type='square';
-        this.oscillator.frequency.setValueAtTime(this.freq,audioCtx.currentTime);
-        this.gainNode.gain.value=0.05;
-        this.oscillator.connect(this.gainNode);
-        this.gainNode.connect(audioCtx.destination);
-        this.oscillator.start();
-      }
+  if(this.type==='ColorMatrix' && isInput) {
+    const R = this.rows || 8;
+    const C = this.cols || 8;
+    if(idx < R) {
+      const step = this.h / (R + 1);
+      return {x:this.x, y:this.y + step*(idx+1)};
     } else {
-      if(this.oscillator){
-        this.oscillator.stop();
-        this.oscillator.disconnect();
-        this.gainNode.disconnect();
-        this.oscillator=null;
-      }
+      const colTotalIdx = idx - R;
+      const totalCols = 3 * C;
+      const step = this.w / (totalCols + 1);
+      return {x:this.x + step*(colTotalIdx+1), y:this.y+this.h};
     }
   }
-
-  draw() {
-    const isSel = selectedParts.includes(this);
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetY = 3;
-
-    if(this.type==='Label') {
-      ctx.fillStyle = isSel ? 'rgba(255,255,255,0.1)' : 'transparent';
-      ctx.strokeStyle = isSel ? COLORS.select : 'transparent';
-      ctx.shadowColor = 'transparent';
-    } else if(this.type==='Matrix' || this.type==='ColorMatrix') {
-      ctx.fillStyle='#000';
-      ctx.strokeStyle = isSel ? COLORS.select : '#333';
-      const decay = 0.85;
-      const total = (this.rows||8) * (this.cols||8);
-      if(this.type==='Matrix') {
-        for(let i=0;i<total;i++) this.gridState[i] *= decay;
-      } else {
-        for(let i=0;i<total;i++) {
-          this.gridState[i].r *= decay;
-          this.gridState[i].g *= decay;
-          this.gridState[i].b *= decay;
-        }
-      }
-    } else if(this.isCustom || this.type==='RAM' || this.type==='ROM') {
-      ctx.fillStyle=this.def.color||'#333';
-      ctx.strokeStyle = isSel ? COLORS.select : '#000';
-    } else if(this.type==='Joint') {
-      ctx.fillStyle = '#bbb';
-      ctx.strokeStyle = isSel ? COLORS.select : '#555';
-    } else {
-      ctx.fillStyle = this.def.color;
-      if((this.type==='Button' || this.type==='KeyInput') && this.active) ctx.fillStyle='#ff5252';
-      ctx.strokeStyle = isSel ? COLORS.select : '#000';
-    }
-
-    if(this.type === 'Joint') {
-      ctx.beginPath();
-      ctx.arc(this.x+this.w/2, this.y+this.h/2, 6, 0, Math.PI*2);
-      ctx.fill();
-      ctx.stroke();
-    } else {
-      ctx.beginPath();
-      ctx.roundRect(this.x, this.y, this.w, this.h, 4);
-      ctx.fill();
-      ctx.shadowBlur=0; 
-      ctx.shadowOffsetY=0;
-      ctx.lineWidth = isSel ? 2 : 1;
-      if(this.type!=='Label' || isSel) ctx.stroke();
-    }
-
-    ctx.fillStyle='#fff';
-    ctx.textAlign='center';
-    ctx.textBaseline='middle';
-
-    if(this.isCustom || this.type==='RAM' || this.type==='ROM' || this.type==='D-FF') {
-      ctx.font='bold 12px sans-serif';
-      ctx.fillText(this.label, this.x+this.w/2, this.y+this.h/2);
-      if(this.type==='RAM') {
-        ctx.fillStyle='#aaa'; ctx.font='9px sans-serif';
-        ctx.textAlign='left'; ctx.fillText('D', this.x+2, this.y+40); ctx.fillText('A', this.x+2, this.y+75); ctx.fillText('WE', this.x+2, this.y+110);
-        ctx.textAlign='right'; ctx.fillText('Q', this.x+this.w-2, this.y+60);
-      }
-    } else if(this.type==='HexDisp') {
-      const segsDat=[[1,1,1,1,1,1,0],[0,1,1,0,0,0,0],[1,1,0,1,1,0,1],[1,1,1,1,0,0,1],[0,1,1,0,0,1,1],[1,0,1,1,0,1,1],[1,0,1,1,1,1,1],[1,1,1,0,0,0,0],[1,1,1,1,1,1,1],[1,1,1,1,0,1,1],[1,1,1,0,1,1,1],[0,0,1,1,1,1,1],[1,0,0,1,1,1,0],[0,1,1,1,1,0,1],[1,0,0,1,1,1,1],[1,0,0,0,1,1,1]];
-      const digits = this.digits || 1;
-      const oneW = this.w / digits;
-      for(let d=0; d<digits; d++) {
-        const idx = d * 4;
-        const val = (this.inputs[idx]?8:0)+(this.inputs[idx+1]?4:0)+(this.inputs[idx+2]?2:0)+(this.inputs[idx+3]?1:0);
-        const segs = segsDat[val];
-        const cx = this.x + this.w - (oneW/2) - (d * oneW);
-        const cy = this.y + this.h/2;
-        const s = Math.min(8, oneW/4);
-        ctx.lineWidth=3; ctx.lineCap='round';
-        const dl=(x1,y1,x2,y2,on)=>{ ctx.strokeStyle=on?'#f00':'#311'; ctx.beginPath();ctx.moveTo(cx+x1,cy+y1);ctx.lineTo(cx+x2,cy+y2);ctx.stroke();};
-        dl(-s,-2*s,s,-2*s,segs[0]); dl(s,-2*s,s,0,segs[1]); dl(s,0,s,2*s,segs[2]);
-        dl(-s,2*s,s,2*s,segs[3]); dl(-s,0,-s,2*s,segs[4]); dl(-s,-2*s,-s,0,segs[5]); dl(-s,0,s,0,segs[6]);
-      }
-    } else if(this.type==='Matrix') {
-      const R = this.rows || 8;
-      const C = this.cols || 8;
-      const pad = 5;
-      const rSize = (this.h - pad*2) / R;
-      const cSize = (this.w - pad*2) / C;
-      const rad = Math.min(rSize, cSize) * 0.35;
-      const gs = this.gridState || new Array(R*C).fill(0);
-      for(let y=0; y<R; y++) {
-        for(let x=0; x<C; x++) {
-          const val = gs[y*C + x];
-          ctx.beginPath();
-          ctx.arc(this.x + pad + x*cSize + cSize/2, this.y + pad + y*rSize + rSize/2, rad, 0, Math.PI*2);
-          ctx.fillStyle = val > 0.1 ? `rgba(255,0,0,${Math.min(1, val)})` : '#311';
-          ctx.fill();
-        }
-      }
-    } else if(this.type==='ColorMatrix') {
-      const R = this.rows || 8;
-      const C = this.cols || 8;
-      const pad = 5;
-      const rSize = (this.h - pad*2) / R;
-      const cSize = (this.w - pad*2) / C;
-      const rad = Math.min(rSize, cSize) * 0.35;
-      const gs = this.gridState || new Array(R*C).fill(0).map(()=>({r:0,g:0,b:0}));
-      for(let y=0; y<R; y++) {
-        for(let x=0; x<C; x++) {
-          const p = gs[y*C + x];
-          ctx.beginPath();
-          ctx.arc(this.x + pad + x*cSize + cSize/2, this.y + pad + y*rSize + rSize/2, rad, 0, Math.PI*2);
-          if (p && (p.r > 0.1 || p.g > 0.1 || p.b > 0.1)) {
-            const r = Math.min(255, Math.floor(p.r*255));
-            const g = Math.min(255, Math.floor(p.g*255));
-            const b = Math.min(255, Math.floor(p.b*255));
-            ctx.fillStyle = `rgb(${r},${g},${b})`;
-          } else {
-            ctx.fillStyle = '#111';
-          }
-          ctx.fill();
-        }
-      }
-    } else if(this.type==='Label') {
-      ctx.textAlign='left';ctx.font='14px sans-serif';ctx.fillText(this.label, this.x+5, this.y+10);
-    } else if(this.type!=='Joint') {
-      ctx.font='bold 11px sans-serif';
-      let t = this.label;
-      if(this.type==='KeyInput') t=`[${this.assignedKey.toUpperCase()}]`;
-      if(view.scale>0.5) ctx.fillText(t, this.x+this.w/2, this.y+this.h/2);
-    }
-
-    if(this.type==='LED' && this.active) {
-      ctx.fillStyle='#ffeb3b';
-      ctx.beginPath(); ctx.arc(this.x+this.w/2, this.y+this.h/2, 10, 0, Math.PI*2); ctx.fill();
-    }
-    if(this.type==='ColorLED' && this.active) {
-      const r=this.inputs[0]?255:0, g=this.inputs[1]?255:0, b=this.inputs[2]?255:0;
-      ctx.fillStyle=`rgb(${r},${g},${b})`;
-      ctx.beginPath(); ctx.arc(this.x+this.w/2, this.y+this.h/2, 12, 0, Math.PI*2); ctx.fill();
-    }
-
-    if(view.scale>0.3 && this.type!=='Label') {
-      const drawP = (isIn, i) => {
-        const pos = this.getPortPos(isIn, i);
-        ctx.beginPath();ctx.arc(pos.x, pos.y, 3/view.scale, 0, Math.PI*2);
-        const on = (isIn ? this.inputs[i] : this.outputs[i]);
-        ctx.fillStyle = on ? COLORS.wireOn : COLORS.wireOff;
-        if(this.type==='Joint') ctx.fillStyle = 'rgba(0,0,0,0)';
-        ctx.fill();
-      };
-      const inCount = this.inputs.length;
-      const outCount = this.outputs.length;
-      for(let i=0; i<inCount; i++) drawP(true, i);
-      for(let i=0; i<outCount; i++) drawP(false, i);
-    }
-    ctx.restore();
+  if(this.type==='Joint') {
+   return {x:this.x+this.w/2, y:this.y+this.h/2};
   }
-
-  getPortPos(isInput, idx) {
-    if(this.type==='Matrix' && isInput) {
-      const R = this.rows || 8;
-      const C = this.cols || 8;
-      if(idx < R) { // Row
-        const step = this.h / (R + 1);
-        return {x:this.x, y:this.y + step*(idx+1)};
-      } else { // Col
-        const colIdx = idx - R;
-        const step = this.w / (C + 1);
-        return {x:this.x + step*(colIdx+1), y:this.y+this.h};
-      }
-    }
-    if(this.type==='ColorMatrix' && isInput) {
-        const R = this.rows || 8;
-        const C = this.cols || 8;
-        if(idx < R) {
-            const step = this.h / (R + 1);
-            return {x:this.x, y:this.y + step*(idx+1)};
-        } else {
-            const colTotalIdx = idx - R;
-            const totalCols = 3 * C;
-            const step = this.w / (totalCols + 1);
-            return {x:this.x + step*(colTotalIdx+1), y:this.y+this.h};
-        }
-    }
-    if(this.type==='Joint') {
-      return {x:this.x+this.w/2, y:this.y+this.h/2};
-    }
-    const cnt = isInput ? this.inputs.length : this.outputs.length;
-    if((this.isCustom || this.type==='RAM' || this.type==='ROM' || this.type==='HexDisp') && isInput) {
-      const step = this.h/(cnt+1);
-      return {x:this.x, y:this.y+step*(idx+1)};
-    }
-    const step = this.h/(cnt+1);
-    return { x: isInput ? this.x : this.x+this.w, y: this.y + step*(idx+1) };
+  const cnt = isInput ? this.inputs.length : this.outputs.length;
+  if((this.isCustom || this.type==='RAM' || this.type==='ROM' || this.type==='HexDisp') && isInput) {
+   const step = this.h/(cnt+1);
+   return {x:this.x, y:this.y+step*(idx+1)};
   }
+  const step = this.h/(cnt+1);
+  return { x: isInput ? this.x : this.x+this.w, y: this.y + step*(idx+1) };
+ }
 
-  hitTest(x,y) { return x>=this.x && x<=this.x+this.w && y>=this.y && y<=this.y+this.h; }
+ hitTest(x,y) { return x>=this.x && x<=this.x+this.w && y>=this.y && y<=this.y+this.h; }
 }
 
 function resize() {
-  width=container.clientWidth;
-  height=container.clientHeight;
-  canvas.width=width;
-  canvas.height=height;
+ width=container.clientWidth;
+ height=container.clientHeight;
+ canvas.width=width;
+ canvas.height=height;
 }
 window.onresize = resize;
 resize();
 
 function loop() {
-  for(let i=0; i<loopsPerFrame; i++) {
-    globalTick++;
-    parts.forEach(p => p.update(globalTick));
-  }
+ for(let i=0; i<loopsPerFrame; i++) {
+  globalTick++;
+  parts.forEach(p => p.update(globalTick));
+ }
 
-  ctx.clearRect(0,0,width,height);
-  ctx.save();
-  ctx.translate(view.x, view.y);
-  ctx.scale(view.scale, view.scale);
+ ctx.clearRect(0,0,width,height);
+ ctx.save();
+ ctx.translate(view.x, view.y);
+ ctx.scale(view.scale, view.scale);
 
-  const st = toWorld(0,0);
-  const en = toWorld(width,height);
-  const step = (view.scale < 0.5) ? GRID*2 : GRID;
+ const st = toWorld(0,0);
+ const en = toWorld(width,height);
+ const step = (view.scale < 0.5) ? GRID*2 : GRID;
 
-  ctx.strokeStyle = '#2a2a2a';
-  ctx.lineWidth = 1/view.scale;
+ ctx.strokeStyle = '#2a2a2a';
+ ctx.lineWidth = 1/view.scale;
+ ctx.beginPath();
+ for(let x=Math.floor(st.x/step)*step; x<en.x; x+=step) { ctx.moveTo(x,st.y); ctx.lineTo(x,en.y); }
+ for(let y=Math.floor(st.y/step)*step; y<en.y; y+=step) { ctx.moveTo(st.x,y); ctx.lineTo(en.x,y); }
+ ctx.stroke();
+
+ wires.forEach(w => {
+  const p1 = w.source.getPortPos(false, w.sourceIdx);
+  if (w.targetIdx >= w.target.inputs.length) return;
+  const p2 = w.target.getPortPos(true, w.targetIdx);
+  const isActive = w.source.outputs[w.sourceIdx];
+   
   ctx.beginPath();
-  for(let x=Math.floor(st.x/step)*step; x<en.x; x+=step) { ctx.moveTo(x,st.y); ctx.lineTo(x,en.y); }
-  for(let y=Math.floor(st.y/step)*step; y<en.y; y+=step) { ctx.moveTo(st.x,y); ctx.lineTo(en.x,y); }
+  ctx.moveTo(p1.x, p1.y);
+  ctx.bezierCurveTo(p1.x+30, p1.y, p2.x-30, p2.y, p2.x, p2.y);
+   
+  if (selectedWires.includes(w)) {
+   ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 4 / view.scale; ctx.stroke(); ctx.lineWidth = 2 / view.scale;
+  }
+  let color = isActive ? COLORS.wireOn : COLORS.wireOff;
+  if(w.color) {
+   if(isActive) color = w.color;
+   else {
+    const c = parseInt(w.color.slice(1), 16);
+    const r=(c>>16)&255, g=(c>>8)&255, b=c&255;
+    color = `rgb(${r*0.4},${g*0.4},${b*0.4})`;
+   }
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3 / Math.max(0.5, Math.min(1.5, view.scale));
   ctx.stroke();
+ });
 
-  wires.forEach(w => {
-    const p1 = w.source.getPortPos(false, w.sourceIdx);
-    if (w.targetIdx >= w.target.inputs.length) return;
-    const p2 = w.target.getPortPos(true, w.targetIdx);
-    const isActive = w.source.outputs[w.sourceIdx];
-    
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.bezierCurveTo(p1.x+30, p1.y, p2.x-30, p2.y, p2.x, p2.y);
-    
-    if (selectedWires.includes(w)) {
-      ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 4 / view.scale; ctx.stroke(); ctx.lineWidth = 2 / view.scale;
-    }
-    let color = isActive ? COLORS.wireOn : COLORS.wireOff;
-    if(w.color) {
-      if(isActive) color = w.color;
-      else {
-        const c = parseInt(w.color.slice(1), 16);
-        const r=(c>>16)&255, g=(c>>8)&255, b=c&255;
-        color = `rgb(${r*0.4},${g*0.4},${b*0.4})`;
-      }
-    }
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3 / Math.max(0.5, Math.min(1.5, view.scale));
-    ctx.stroke();
-  });
-
-  if(tempWire) {
-    const m = toWorld(mouse.x, mouse.y);
-    let d = m;
-    if(targetPort && targetPort.isInput) {
-      const p = targetPort.parent.getPortPos(true, targetPort.idx);
-      d = {x:p.x, y:p.y};
-    }
-    const s = tempWire.startPart.getPortPos(false, tempWire.startIdx);
-    ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(d.x, d.y);
-    ctx.strokeStyle = '#888'; ctx.lineWidth=2; ctx.setLineDash([5,5]); ctx.stroke(); ctx.setLineDash([]);
+ if(tempWire) {
+  const m = toWorld(mouse.x, mouse.y);
+  let d = m;
+  if(targetPort && targetPort.isInput) {
+   const p = targetPort.parent.getPortPos(true, targetPort.idx);
+   d = {x:p.x, y:p.y};
   }
+  const s = tempWire.startPart.getPortPos(false, tempWire.startIdx);
+  ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(d.x, d.y);
+  ctx.strokeStyle = '#888'; ctx.lineWidth=2; ctx.setLineDash([5,5]); ctx.stroke(); ctx.setLineDash([]);
+ }
 
-  parts.forEach(p => p.draw());
+ parts.forEach(p => p.draw());
 
-  if(state === STATE.SELECTING) {
-    const s = toWorld(mouse.downX, mouse.downY);
-    const c = toWorld(mouse.x, mouse.y);
-    ctx.strokeStyle = COLORS.select; ctx.lineWidth = 1/view.scale;
-    ctx.setLineDash([4/view.scale, 2/view.scale]);
-    ctx.strokeRect(s.x, s.y, c.x-s.x, c.y-s.y);
-    ctx.setLineDash([]);
-  }
-  ctx.restore();
-  requestAnimationFrame(loop);
+ if(state === STATE.SELECTING) {
+  const s = toWorld(mouse.downX, mouse.downY);
+  const c = toWorld(mouse.x, mouse.y);
+  ctx.strokeStyle = COLORS.select; ctx.lineWidth = 1/view.scale;
+  ctx.setLineDash([4/view.scale, 2/view.scale]);
+  ctx.strokeRect(s.x, s.y, c.x-s.x, c.y-s.y);
+  ctx.setLineDash([]);
+ }
+ ctx.restore();
+ requestAnimationFrame(loop);
 }
 
 function hitTestWire(mx, my) {
-  const threshold = 5 / view.scale;
-  for(let w of wires) {
-    const p1 = w.source.getPortPos(false, w.sourceIdx);
-    if (w.targetIdx >= w.target.inputs.length) continue;
-    const p2 = w.target.getPortPos(true, w.targetIdx);
-    for(let t=0; t<=1; t+=0.05) {
-      const x = (1-t)*(1-t)*(1-t)*p1.x + 3*(1-t)*(1-t)*t*(p1.x+30) + 3*(1-t)*t*t*(p2.x-30) + t*t*t*p2.x;
-      const y = (1-t)*(1-t)*(1-t)*p1.y + 3*(1-t)*(1-t)*t*(p1.y) + 3*(1-t)*t*t*(p2.y) + t*t*t*p2.y;
-      if(Math.hypot(mx-x, my-y) < threshold) return w;
-    }
+ const threshold = 5 / view.scale;
+ for(let w of wires) {
+  const p1 = w.source.getPortPos(false, w.sourceIdx);
+  if (w.targetIdx >= w.target.inputs.length) continue;
+  const p2 = w.target.getPortPos(true, w.targetIdx);
+  for(let t=0; t<=1; t+=0.05) {
+   const x = (1-t)*(1-t)*(1-t)*p1.x + 3*(1-t)*(1-t)*t*(p1.x+30) + 3*(1-t)*t*t*(p2.x-30) + t*t*t*p2.x;
+   const y = (1-t)*(1-t)*(1-t)*p1.y + 3*(1-t)*(1-t)*t*(p1.y) + 3*(1-t)*t*t*(p2.y) + t*t*t*p2.y;
+   if(Math.hypot(mx-x, my-y) < threshold) return w;
   }
-  return null;
+ }
+ return null;
 }
 
 function drag(e, type) { e.dataTransfer.setData('text/plain', type); }
@@ -930,393 +923,405 @@ canvas.addEventListener('dragover', e => e.preventDefault());
 canvas.addEventListener('drop', e => { e.preventDefault(); const type = e.dataTransfer.getData('text/plain'); if(type) addPart(type, e.clientX, e.clientY); });
 
 function addPart(type, cx, cy) {
-  let wPos;
-  if(cx && cy) {
-    const r = canvas.getBoundingClientRect();
-    wPos = toWorld(cx - r.left, cy - r.top);
-  } else {
-    wPos = toWorld(width/2, height/2);
-  }
-  parts.push(new Part(type, wPos.x - 20, wPos.y - 20));
-  pushHistory();
-  statusEl.innerText = txt('status_placed', type);
+ let wPos;
+ if(cx && cy) {
+  const r = canvas.getBoundingClientRect();
+  wPos = toWorld(cx - r.left, cy - r.top);
+ } else {
+  wPos = toWorld(width/2, height/2);
+ }
+ parts.push(new Part(type, wPos.x - 20, wPos.y - 20));
+ pushHistory();
+ statusEl.innerText = txt('status_placed', type);
 }
 
 function deletePartAt(cx, cy) {
-  const w = toWorld(cx, cy);
-  const hit = parts.slice().reverse().find(p => p.hitTest(w.x, w.y));
-  if(hit) {
-    if(hit.oscillator) hit.oscillator.stop();
-    parts = parts.filter(p => p !== hit);
-    wires = wires.filter(wire => wire.source !== hit && wire.target !== hit);
-    pushHistory();
-    return;
-  }
-  const hitWire = hitTestWire(w.x, w.y);
-  if(hitWire) {
-    wires = wires.filter(w => w !== hitWire);
-    pushHistory();
-  }
+ const w = toWorld(cx, cy);
+ const hit = parts.slice().reverse().find(p => p.hitTest(w.x, w.y));
+ if(hit) {
+  if(hit.oscillator) try { hit.oscillator.stop(); } catch(e){}
+  parts = parts.filter(p => p !== hit);
+  wires = wires.filter(wire => wire.source !== hit && wire.target !== hit);
+  pushHistory();
+  return;
+ }
+ const hitWire = hitTestWire(w.x, w.y);
+ if(hitWire) {
+  wires = wires.filter(w => w !== hitWire);
+  pushHistory();
+ }
 }
 
 canvas.addEventListener('mousedown', e => {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  const r = canvas.getBoundingClientRect();
-  mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
-  mouse.downX = mouse.x; mouse.downY = mouse.y;
-  mouse.dragStartX = mouse.x; mouse.dragStartY = mouse.y;
-  mouse.downPart = null; hasDraggedPart = false;
+ if(audioCtx.state === 'suspended') audioCtx.resume();
+ const r = canvas.getBoundingClientRect();
+ mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+ mouse.downX = mouse.x; mouse.downY = mouse.y;
+ mouse.dragStartX = mouse.x; mouse.dragStartY = mouse.y;
+ mouse.downPart = null; hasDraggedPart = false;
 
-  const w = toWorld(mouse.x, mouse.y);
-  if(isSpacePressed || e.button === 1 || mode === 'pan') { state = STATE.PANNING; canvas.style.cursor = 'grabbing'; return; }
-  if(e.button === 2) { deletePartAt(mouse.x, mouse.y); return; }
+ const w = toWorld(mouse.x, mouse.y);
+ if(isSpacePressed || e.button === 1 || mode === 'pan') { state = STATE.PANNING; canvas.style.cursor = 'grabbing'; return; }
+ if(e.button === 2) { deletePartAt(mouse.x, mouse.y); return; }
 
-  const distLimit = Math.min(20, 15 / view.scale);
-  for(let p of parts) {
-    if(p.type === 'Label') continue;
-    for(let i=0; i<p.outputs.length; i++) {
-      const pos = p.getPortPos(false, i);
-      let limit = distLimit; if(p.type === 'Joint') limit = Math.max(limit, 12);
-      if(Math.hypot(w.x-pos.x, w.y-pos.y) < limit) { state = STATE.WIRING; tempWire = { startPart: p, startIdx: i }; return; }
-    }
+ const distLimit = Math.min(20, 15 / view.scale);
+ for(let p of parts) {
+  if(p.type === 'Label') continue;
+  for(let i=0; i<p.outputs.length; i++) {
+   const pos = p.getPortPos(false, i);
+   let limit = distLimit; if(p.type === 'Joint') limit = Math.max(limit, 12);
+   if(Math.hypot(w.x-pos.x, w.y-pos.y) < limit) { state = STATE.WIRING; tempWire = { startPart: p, startIdx: i }; return; }
   }
+ }
 
-  const hit = parts.slice().reverse().find(p => p.hitTest(w.x, w.y));
-  if(hit) {
-    if(hit.type === 'Button' || hit.type === 'KeyInput') hit.active = true;
-    if(!e.shiftKey && !selectedParts.includes(hit)) { selectedParts = [hit]; selectedWires = []; }
-    else if(e.shiftKey && !selectedParts.includes(hit)) selectedParts.push(hit);
-    state = STATE.DRAGGING; mouse.downPart = hit;
-    dragOffsets.clear();
-    selectedParts.forEach(p => dragOffsets.set(p, {dx: w.x - p.x, dy: w.y - p.y}));
-    return;
-  }
-  const hitWire = hitTestWire(w.x, w.y);
-  if(hitWire) { selectedWires = [hitWire]; selectedParts = []; return; }
-  if(!e.shiftKey) { selectedParts = []; selectedWires = []; }
-  state = STATE.SELECTING;
+ const hit = parts.slice().reverse().find(p => p.hitTest(w.x, w.y));
+ if(hit) {
+  if(hit.type === 'Button' || hit.type === 'KeyInput') hit.active = true;
+  if(!e.shiftKey && !selectedParts.includes(hit)) { selectedParts = [hit]; selectedWires = []; }
+  else if(e.shiftKey && !selectedParts.includes(hit)) selectedParts.push(hit);
+  state = STATE.DRAGGING; mouse.downPart = hit;
+  dragOffsets.clear();
+  selectedParts.forEach(p => dragOffsets.set(p, {dx: w.x - p.x, dy: w.y - p.y}));
+  return;
+ }
+ const hitWire = hitTestWire(w.x, w.y);
+ if(hitWire) { selectedWires = [hitWire]; selectedParts = []; return; }
+ if(!e.shiftKey) { selectedParts = []; selectedWires = []; }
+ state = STATE.SELECTING;
 });
 
 canvas.addEventListener('mousemove', e => {
-  const r = canvas.getBoundingClientRect();
-  const dx = (e.clientX - r.left) - mouse.x; const dy = (e.clientY - r.top) - mouse.y;
-  mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
-  const w = toWorld(mouse.x, mouse.y);
+ const r = canvas.getBoundingClientRect();
+ const dx = (e.clientX - r.left) - mouse.x; const dy = (e.clientY - r.top) - mouse.y;
+ mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+ const w = toWorld(mouse.x, mouse.y);
 
-  if(state === STATE.PANNING) { view.x += dx; view.y += dy; }
-  else if(state === STATE.DRAGGING) {
-    if(Math.hypot(mouse.x - mouse.dragStartX, mouse.y - mouse.dragStartY) > 5) {
-      hasDraggedPart = true;
-      if(mouse.downPart && (mouse.downPart.type==='Button'||mouse.downPart.type==='KeyInput')) { mouse.downPart.active = false; }
-    }
-    selectedParts.forEach(p => {
-      const off = dragOffsets.get(p);
-      if(off) { p.x = snap(w.x - off.dx); p.y = snap(w.y - off.dy); }
-    });
+ if(state === STATE.PANNING) { view.x += dx; view.y += dy; }
+ else if(state === STATE.DRAGGING) {
+  if(Math.hypot(mouse.x - mouse.dragStartX, mouse.y - mouse.dragStartY) > 5) {
+   hasDraggedPart = true;
+   if(mouse.downPart && (mouse.downPart.type==='Button'||mouse.downPart.type==='KeyInput')) { mouse.downPart.active = false; }
   }
-  else if(state === STATE.WIRING) {
-    targetPort = null;
-    const distLimit = Math.min(20, 15 / view.scale);
-    for(let p of parts) {
-      if(p === tempWire.startPart) continue;
-      for(let i=0; i<p.inputs.length; i++) {
-        const pos = p.getPortPos(true, i);
-        let limit = distLimit; if(p.type === 'Joint') limit = Math.max(limit, 12);
-        if(Math.hypot(w.x-pos.x, w.y-pos.y) < limit) { targetPort = { parent: p, idx: i, isInput: true }; }
-      }
-    }
+  selectedParts.forEach(p => {
+   const off = dragOffsets.get(p);
+   if(off) { p.x = snap(w.x - off.dx); p.y = snap(w.y - off.dy); }
+  });
+ }
+ else if(state === STATE.WIRING) {
+  targetPort = null;
+  const distLimit = Math.min(20, 15 / view.scale);
+  for(let p of parts) {
+   if(p === tempWire.startPart) continue;
+   for(let i=0; i<p.inputs.length; i++) {
+    const pos = p.getPortPos(true, i);
+    let limit = distLimit; if(p.type === 'Joint') limit = Math.max(limit, 12);
+    if(Math.hypot(w.x-pos.x, w.y-pos.y) < limit) { targetPort = { parent: p, idx: i, isInput: true }; }
+   }
   }
+ }
 });
 
 canvas.addEventListener('mouseup', e => {
-  if(state === STATE.PANNING) { state = STATE.IDLE; canvas.style.cursor = isSpacePressed ? 'grab' : 'default'; }
-  else if(state === STATE.DRAGGING) {
-    if(!hasDraggedPart && mouse.downPart) {
-      if(mouse.downPart.type === 'Switch') { mouse.downPart.active = !mouse.downPart.active; pushHistory(); }
-    }
-    if(mouse.downPart && (mouse.downPart.type==='Button'||mouse.downPart.type==='KeyInput')) { mouse.downPart.active = false; }
-    if(hasDraggedPart) pushHistory();
-    state = STATE.IDLE;
+ if(state === STATE.PANNING) { state = STATE.IDLE; canvas.style.cursor = isSpacePressed ? 'grab' : 'default'; }
+ else if(state === STATE.DRAGGING) {
+  if(!hasDraggedPart && mouse.downPart) {
+   if(mouse.downPart.type === 'Switch') { mouse.downPart.active = !mouse.downPart.active; pushHistory(); }
   }
-  else if(state === STATE.WIRING && targetPort) {
-    wires = wires.filter(w => !(w.target === targetPort.parent && w.targetIdx === targetPort.idx));
-    wires.push({ source: tempWire.startPart, sourceIdx: tempWire.startIdx, target: targetPort.parent, targetIdx: targetPort.idx, color: null });
-    pushHistory();
-  }
-  else if(state === STATE.SELECTING) {
-    const wS = toWorld(mouse.downX, mouse.downY); const wE = toWorld(mouse.x, mouse.y);
-    const x1=Math.min(wS.x,wE.x), y1=Math.min(wS.y,wE.y), x2=Math.max(wS.x,wE.x), y2=Math.max(wS.y, wE.y);
-    const newSel = parts.filter(p => p.x+p.w>x1 && p.x<x2 && p.y+p.h>y1 && p.y<y2);
-    if(e.shiftKey) newSel.forEach(p => { if(!selectedParts.includes(p)) selectedParts.push(p); });
-    else selectedParts = newSel;
-  }
-  if(state !== STATE.PANNING) state = STATE.IDLE;
-  tempWire = null; targetPort = null; mouse.downPart = null;
+  if(mouse.downPart && (mouse.downPart.type==='Button'||mouse.downPart.type==='KeyInput')) { mouse.downPart.active = false; }
+  if(hasDraggedPart) pushHistory();
+  state = STATE.IDLE;
+ }
+ else if(state === STATE.WIRING && targetPort) {
+  wires = wires.filter(w => !(w.target === targetPort.parent && w.targetIdx === targetPort.idx));
+  wires.push({ source: tempWire.startPart, sourceIdx: tempWire.startIdx, target: targetPort.parent, targetIdx: targetPort.idx, color: null });
+  pushHistory();
+ }
+ else if(state === STATE.SELECTING) {
+  const wS = toWorld(mouse.downX, mouse.downY); const wE = toWorld(mouse.x, mouse.y);
+  const x1=Math.min(wS.x,wE.x), y1=Math.min(wS.y,wE.y), x2=Math.max(wS.x,wE.x), y2=Math.max(wS.y, wE.y);
+  const newSel = parts.filter(p => p.x+p.w>x1 && p.x<x2 && p.y+p.h>y1 && p.y<y2);
+  if(e.shiftKey) newSel.forEach(p => { if(!selectedParts.includes(p)) selectedParts.push(p); });
+  else selectedParts = newSel;
+ }
+ if(state !== STATE.PANNING) state = STATE.IDLE;
+ tempWire = null; targetPort = null; mouse.downPart = null;
 });
 
 function editPart(hit) {
-  let changed = false;
-  if(hit.type==='ROM') {
-    const str = prompt(txt('prompt_rom'), hit.data.map(v=>v.toString(16)).join(' '));
-    if(str) { hit.data = str.split(' ').map(v=>parseInt(v,16)||0).slice(0,16); changed=true;}
-  } else if(hit.type==='KeyInput') {
-    const k = prompt(txt('prompt_key'), hit.assignedKey);
-    if(k){hit.assignedKey=k; changed=true;}
-    if(confirm(txt('confirm_toggle'))) hit.isToggleMode=true; else hit.isToggleMode=false;
-  } else if(hit.type==='HexDisp') {
-    const d = prompt(txt('prompt_digits'), hit.digits || 1);
-    const num = parseInt(d);
-    if(num >= 1 && num <= 8) {
-      hit.digits = num; hit.w = 50 * num;
-      hit.def.in = num * 4; hit.inputs = new Array(hit.def.in).fill(false);
-      changed=true;
-    }
-  } else if(hit.type==='Matrix' || hit.type==='ColorMatrix') {
-    const r = parseInt(prompt(txt('prompt_rows'), hit.rows||8));
-    const c = parseInt(prompt(txt('prompt_cols'), hit.cols||8));
-    if(r>0 && c>0) {
-      const defaultPitch = 12.5; const autoSize = c * defaultPitch;
-      const sizeStr = prompt(txt('prompt_size', autoSize), "");
-      let newW = autoSize; let newH = r * defaultPitch;
-      if(sizeStr) { const s = parseInt(sizeStr); if(s > 0) { newW = s; newH = s * (r/c); } }
-      hit.rows = r; hit.cols = c; hit.w = newW; hit.h = newH;
-      if(hit.type==='Matrix') hit.def.in = r + c; else hit.def.in = r + c * 3;
-      hit.inputs = new Array(hit.def.in).fill(false);
-      hit.gridState = null;
-      changed=true;
-    }
-  } else if(hit.label !== undefined) {
-    const val = prompt(txt('prompt_label'), hit.label);
-    if(val!==null) {
-      hit.label = val;
-      if(['Clock','Delay','Buzzer'].includes(hit.type)) Object.assign(hit, {interval:parseInt(val)||500, delayTime:parseInt(val)||1000, freq:parseInt(val)||440});
-      changed=true;
-    }
+ let changed = false;
+ if(hit.type==='ROM') {
+  const str = prompt(txt('prompt_rom'), hit.data.map(v=>v.toString(16)).join(' '));
+  if(str) { hit.data = str.split(' ').map(v=>parseInt(v,16)||0).slice(0,16); changed=true;}
+ } else if(hit.type==='KeyInput') {
+  const k = prompt(txt('prompt_key'), hit.assignedKey);
+  if(k){hit.assignedKey=k; changed=true;}
+  if(confirm(txt('confirm_toggle'))) hit.isToggleMode=true; else hit.isToggleMode=false;
+ } else if(hit.type==='HexDisp') {
+  const d = prompt(txt('prompt_digits'), hit.digits || 1);
+  const num = parseInt(d);
+  if(num >= 1 && num <= 8) {
+   hit.digits = num; hit.w = 50 * num;
+   hit.def.in = num * 4; hit.inputs = new Array(hit.def.in).fill(false);
+   changed=true;
   }
-  if(changed) pushHistory();
+ } else if(hit.type==='Matrix' || hit.type==='ColorMatrix') {
+  const rStr = prompt(txt('prompt_rows'), hit.rows||8);
+  const cStr = prompt(txt('prompt_cols'), hit.cols||8);
+  const r = parseInt(rStr);
+  const c = parseInt(cStr);
+  if(r>0 && c>0) {
+   const defaultPitch = 12.5; const autoSize = c * defaultPitch;
+   const sizeStr = prompt(txt('prompt_size', autoSize), "");
+   let newW = autoSize; let newH = r * defaultPitch;
+   if(sizeStr) { const s = parseInt(sizeStr); if(s > 0) { newW = s; newH = s * (r/c); } }
+   hit.rows = r; hit.cols = c; hit.w = newW; hit.h = newH;
+   if(hit.type==='Matrix') hit.def.in = r + c; else hit.def.in = r + c * 3;
+   hit.inputs = new Array(hit.def.in).fill(false);
+   hit.gridState = null;
+   changed=true;
+  }
+ } else if(hit.label !== undefined) {
+  const val = prompt(txt('prompt_label'), hit.label);
+  if(val!==null) {
+   hit.label = val;
+   if(['Clock','Delay','Buzzer'].includes(hit.type)) Object.assign(hit, {interval:parseInt(val)||500, delayTime:parseInt(val)||1000, freq:parseInt(val)||440});
+   changed=true;
+  }
+ }
+ if(changed) pushHistory();
 }
 
 window.addEventListener('keydown', e => {
-  if(modal.style.display === 'flex') return;
-  if(e.code === 'Space' && !isSpacePressed) { isSpacePressed = true; if(state === STATE.IDLE) canvas.style.cursor = 'grab'; e.preventDefault(); }
-  const isCtrl = e.ctrlKey || e.metaKey;
-  if(isCtrl && e.key.toLowerCase()==='z') { undo(); e.preventDefault(); }
-  if(isCtrl && e.key.toLowerCase()==='c') { copySelection(); e.preventDefault(); }
-  if(isCtrl && e.key.toLowerCase()==='v') { pasteSelection(); e.preventDefault(); }
-  if(e.key === 'Delete' || e.key === 'Backspace') {
-    if(selectedParts.length > 0) deleteSelected();
-    if(selectedWires.length > 0) { wires = wires.filter(w => !selectedWires.includes(w)); selectedWires = []; pushHistory(); }
+ if(modal.style.display === 'flex') return;
+ if(e.code === 'Space' && !isSpacePressed) { isSpacePressed = true; if(state === STATE.IDLE) canvas.style.cursor = 'grab'; e.preventDefault(); }
+ const isCtrl = e.ctrlKey || e.metaKey;
+ if(isCtrl && e.key.toLowerCase()==='z') { undo(); e.preventDefault(); }
+ if(isCtrl && e.key.toLowerCase()==='c') { copySelection(); e.preventDefault(); }
+ if(isCtrl && e.key.toLowerCase()==='v') { pasteSelection(); e.preventDefault(); }
+ if(e.key === 'Delete' || e.key === 'Backspace') {
+  if(selectedParts.length > 0) deleteSelected();
+  if(selectedWires.length > 0) { wires = wires.filter(w => !selectedWires.includes(w)); selectedWires = []; pushHistory(); }
+ }
+ if(e.key === 'Escape') { state = STATE.IDLE; tempWire = null; selectedParts = []; selectedWires = []; canvas.style.cursor = 'default'; }
+ if(e.key.toLowerCase() === 'e' && selectedParts.length === 1) { editPart(selectedParts[0]); }
+ if(e.key.toLowerCase() === 'c' && selectedWires.length > 0) {
+  selectedWires.forEach(w => { let idx = WIRE_COLORS.indexOf(w.color); idx = (idx + 1) % WIRE_COLORS.length; w.color = WIRE_COLORS[idx]; });
+  pushHistory();
+ }
+ parts.forEach(p => {
+  if (p.type === 'KeyInput' && e.key.toLowerCase() === p.assignedKey.toLowerCase()) {
+   if (p.isToggleMode) { if (!p.isKeyPressed) { p.active = !p.active; p.outputs[0] = p.active; } }
+   else { p.active = true; p.outputs[0] = true; }
+   p.isKeyPressed = true;
   }
-  if(e.key === 'Escape') { state = STATE.IDLE; tempWire = null; selectedParts = []; selectedWires = []; canvas.style.cursor = 'default'; }
-  if(e.key.toLowerCase() === 'e' && selectedParts.length === 1) { editPart(selectedParts[0]); }
-  if(e.key.toLowerCase() === 'c' && selectedWires.length > 0) {
-    selectedWires.forEach(w => { let idx = WIRE_COLORS.indexOf(w.color); idx = (idx + 1) % WIRE_COLORS.length; w.color = WIRE_COLORS[idx]; });
-    pushHistory();
-  }
-  parts.forEach(p => {
-    if (p.type === 'KeyInput' && e.key.toLowerCase() === p.assignedKey.toLowerCase()) {
-      if (p.isToggleMode) { if (!p.isKeyPressed) { p.active = !p.active; p.outputs[0] = p.active; } }
-      else { p.active = true; p.outputs[0] = true; }
-      p.isKeyPressed = true;
-    }
-  });
+ });
 });
 
 window.addEventListener('keyup', e => {
-  if(e.code === 'Space') { isSpacePressed = false; if(state === STATE.PANNING) state = STATE.IDLE; canvas.style.cursor = 'default'; }
-  parts.forEach(p => {
-    if (p.type === 'KeyInput' && e.key.toLowerCase() === p.assignedKey.toLowerCase()) {
-      if (!p.isToggleMode) { p.active = false; p.outputs[0] = false; }
-      p.isKeyPressed = false;
-    }
-  });
+ if(e.code === 'Space') { isSpacePressed = false; if(state === STATE.PANNING) state = STATE.IDLE; canvas.style.cursor = 'default'; }
+ parts.forEach(p => {
+  if (p.type === 'KeyInput' && e.key.toLowerCase() === p.assignedKey.toLowerCase()) {
+   if (!p.isToggleMode) { p.active = false; p.outputs[0] = false; }
+   p.isKeyPressed = false;
+  }
+ });
 });
 
 canvas.addEventListener('wheel', e => {
-  e.preventDefault();
-  const z = Math.exp(e.deltaY < 0 ? 0.1 : -0.1);
-  const newScale = view.scale * z;
-  if (newScale > 0.1 && newScale < 5.0) {
-    const wx = (mouse.x - view.x)/view.scale;
-    const wy = (mouse.y - view.y)/view.scale;
-    view.x -= wx * (newScale - view.scale);
-    view.y -= wy * (newScale - view.scale);
-    view.scale = newScale;
-  }
+ e.preventDefault();
+ const z = Math.exp(e.deltaY < 0 ? 0.1 : -0.1);
+ const newScale = view.scale * z;
+ if (newScale > 0.1 && newScale < 5.0) {
+  const wx = (mouse.x - view.x)/view.scale;
+  const wy = (mouse.y - view.y)/view.scale;
+  view.x -= wx * (newScale - view.scale);
+  view.y -= wy * (newScale - view.scale);
+  view.scale = newScale;
+ }
 });
 
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 
 function createCustomChip() {
-  if(selectedParts.length === 0) { alert(txt('alert_select_chip')); return; }
-  const name = prompt(txt('prompt_chip_name'), "MyChip");
-  if(!name) return;
-  const inPins = selectedParts.filter(p => p.type==='PinIn').sort((a,b)=>a.y-b.y);
-  const outPins = selectedParts.filter(p => p.type==='PinOut').sort((a,b)=>a.y-b.y);
-  if(inPins.length===0 && outPins.length===0 && !confirm(txt('confirm_no_pins'))) return;
+ if(selectedParts.length === 0) { alert(txt('alert_select_chip')); return; }
+ const name = prompt(txt('prompt_chip_name'), "MyChip");
+ if(!name) return;
+ const inPins = selectedParts.filter(p => p.type==='PinIn').sort((a,b)=>a.y-b.y);
+ const outPins = selectedParts.filter(p => p.type==='PinOut').sort((a,b)=>a.y-b.y);
+ if(inPins.length===0 && outPins.length===0 && !confirm(txt('confirm_no_pins'))) return;
 
-  let minX=Infinity, minY=Infinity;
-  selectedParts.forEach(p => { if(p.x<minX)minX=p.x; if(p.y<minY)minY=p.y; });
-  const chipParts = selectedParts.map(p => ({
-    id: p.id, type: p.type, x: p.x - minX, y: p.y - minY,
-    label: p.label, interval: p.interval, delayTime: p.delayTime, freq: p.freq,
-    assignedKey: p.assignedKey, data: p.data, digits: p.digits, rows: p.rows, cols: p.cols
-  }));
-  const chipWires = wires.filter(w => selectedParts.includes(w.source) && selectedParts.includes(w.target)).map(w => ({
-    srcId: w.source.id, srcIdx: w.sourceIdx, tgtId: w.target.id, tgtIdx: w.targetIdx, color: w.color
-  }));
+ let minX=Infinity, minY=Infinity;
+ selectedParts.forEach(p => { if(p.x<minX)minX=p.x; if(p.y<minY)minY=p.y; });
+ const chipParts = selectedParts.map(p => ({
+  id: p.id, type: p.type, x: p.x - minX, y: p.y - minY,
+  label: p.label, interval: p.interval, delayTime: p.delayTime, freq: p.freq,
+  assignedKey: p.assignedKey, data: p.data ? [...p.data] : null, digits: p.digits, rows: p.rows, cols: p.cols
+ }));
+ const chipWires = wires.filter(w => selectedParts.includes(w.source) && selectedParts.includes(w.target)).map(w => ({
+  srcId: w.source.id, srcIdx: w.sourceIdx, tgtId: w.target.id, tgtIdx: w.targetIdx, color: w.color
+ }));
 
-  customDefs[name] = {
-    w: 60, h: Math.max(40, Math.max(inPins.length, outPins.length)*20+20),
-    in: inPins.length, out: outPins.length,
-    color: '#5c6bc0', label: name,
-    parts: chipParts, wires: chipWires
-  };
-  addChipToSidebar(name);
-  selectedParts = [];
-  pushHistory();
-  statusEl.innerText = txt('status_ic_created', name);
+ customDefs[name] = {
+  w: 60, h: Math.max(40, Math.max(inPins.length, outPins.length)*20+20),
+  in: inPins.length, out: outPins.length,
+  color: '#5c6bc0', label: name,
+  parts: chipParts, wires: chipWires
+ };
+ addChipToSidebar(name);
+ selectedParts = [];
+ pushHistory();
+ statusEl.innerText = txt('status_ic_created', name);
 }
 
 function addChipToSidebar(name) {
-  const div = document.createElement('div');
-  div.className = 'tool-btn';
-  div.draggable = true;
-  // Fixed empty template literal here
-  div.innerHTML = `<span class="icon">🧩</span> ${name}`;
-  div.onclick = () => addPart(name);
-  div.ondragstart = (e) => drag(e, name);
-  document.getElementById('user-chips-list').appendChild(div);
+ const list = document.getElementById('user-chips-list');
+ const div = document.createElement('div');
+ div.className = 'tool-btn';
+ div.draggable = true;
+ div.innerHTML = `<span class="icon">🧩</span> ${}`;
+ div.onclick = () => addPart(name);
+ div.ondragstart = (e) => drag(e, name);
+ list.appendChild(div);
 }
 
 function openIO() {
-  const data = {
-    customDefs,
-    parts: parts.map(p=>({ id:p.id, type:p.type, x:p.x, y:p.y, label:p.label, assignedKey:p.assignedKey, data:p.data, digits:p.digits, rows:p.rows, cols:p.cols, interval:p.interval })),
-    wires: wires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
-  };
-  ioText.value = JSON.stringify(data);
-  modal.style.display = 'flex';
+ const data = {
+  customDefs,
+  parts: parts.map(p=>({ id:p.id, type:p.type, x:p.x, y:p.y, label:p.label, assignedKey:p.assignedKey, data:p.data, digits:p.digits, rows:p.rows, cols:p.cols, interval:p.interval })),
+  wires: wires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
+ };
+ ioText.value = JSON.stringify(data);
+ modal.style.display = 'flex';
 }
 function closeIO() { modal.style.display = 'none'; }
 function copyIO() { ioText.select(); document.execCommand('copy'); alert(txt('alert_copied')); }
 function loadFromText() { try { loadData(JSON.parse(ioText.value)); closeIO(); pushHistory(); } catch(e) { alert(txt('alert_invalid')); } }
 
 function loadFile(input) {
-  const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => { loadData(JSON.parse(e.target.result)); history=[]; pushHistory(); };
-  reader.readAsText(file);
-  input.value = '';
+ const file = input.files[0];
+ if(!file) return;
+ const reader = new FileReader();
+ reader.onload = (e) => { 
+  try {
+   loadData(JSON.parse(e.target.result)); history=[]; pushHistory(); 
+  } catch(err) { alert(txt('alert_invalid')); }
+ };
+ reader.readAsText(file);
+ input.value = '';
 }
 function saveFile() { openIO(); }
 
 function loadData(d) {
-  customDefs = d.customDefs || {};
-  document.getElementById('user-chips-list').innerHTML = '';
-  Object.keys(customDefs).forEach(name => addChipToSidebar(name));
-  parts = []; wires = [];
+ customDefs = d.customDefs || {};
+ document.getElementById('user-chips-list').innerHTML = '';
+ Object.keys(customDefs).forEach(name => addChipToSidebar(name));
+ parts = []; wires = [];
 
-  if(d.parts) d.parts.forEach(p => {
-    const np = new Part(p.type, p.x, p.y);
-    Object.assign(np, p);
-    if(np.type === 'HexDisp' && np.digits) { np.def.in = np.digits*4; np.inputs = new Array(np.def.in).fill(false); np.w = 50*np.digits; }
-    if(np.type === 'Matrix' && np.rows) { np.def.in = np.rows+np.cols; np.inputs = new Array(np.def.in).fill(false); }
-    if(np.type === 'ColorMatrix' && np.rows) { np.def.in = np.rows+np.cols*3; np.inputs = new Array(np.def.in).fill(false); }
-    parts.push(np);
-  });
-  if(d.wires) d.wires.forEach(w => {
-    const s = parts.find(p=>p.id===w.srcId);
-    const t = parts.find(p=>p.id===w.tgtId);
-    if(s && t) wires.push({ source:s, sourceIdx:w.srcIdx, target:t, targetIdx:w.tgtIdx, color:w.color });
-  });
+ if(d.parts) d.parts.forEach(p => {
+  const np = new Part(p.type, p.x, p.y);
+  Object.assign(np, p);
+  if(np.type === 'HexDisp' && np.digits) { np.def.in = np.digits*4; np.inputs = new Array(np.def.in).fill(false); np.w = 50*np.digits; }
+  if(np.type === 'Matrix' && np.rows) { np.def.in = np.rows+np.cols; np.inputs = new Array(np.def.in).fill(false); }
+  if(np.type === 'ColorMatrix' && np.rows) { np.def.in = np.rows+np.cols*3; np.inputs = new Array(np.def.in).fill(false); }
+  np.outputs = new Array(np.def.out).fill(false);
+  parts.push(np);
+ });
+ if(d.wires) d.wires.forEach(w => {
+  const s = parts.find(p=>p.id===w.srcId);
+  const t = parts.find(p=>p.id===w.tgtId);
+  if(s && t) wires.push({ source:s, sourceIdx:w.srcIdx, target:t, targetIdx:w.tgtIdx, color:w.color });
+ });
 }
 
 function pushHistory() {
-  if(isUndoRedo) return;
-  const state = JSON.stringify({
-    customDefs,
-    parts: parts.map(p=>({ id:p.id, type:p.type, x:p.x, y:p.y, label:p.label, assignedKey:p.assignedKey, data:p.data, digits:p.digits, rows:p.rows, cols:p.cols, interval:p.interval })),
-    wires: wires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
-  });
-  if(historyIndex < history.length-1) history = history.slice(0, historyIndex+1);
-  history.push(state);
-  if(history.length>MAX_HISTORY) history.shift(); else historyIndex++;
+ if(isUndoRedo) return;
+ const state = JSON.stringify({
+  customDefs,
+  parts: parts.map(p=>({ id:p.id, type:p.type, x:p.x, y:p.y, label:p.label, assignedKey:p.assignedKey, data:p.data, digits:p.digits, rows:p.rows, cols:p.cols, interval:p.interval })),
+  wires: wires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
+ });
+ if(historyIndex < history.length-1) history = history.slice(0, historyIndex+1);
+ history.push(state);
+ if(history.length>MAX_HISTORY) history.shift(); else historyIndex++;
 }
 setTimeout(pushHistory, 100);
 
 function undo() {
-  if(historyIndex>0) {
-    historyIndex--;
-    isUndoRedo=true;
-    loadData(JSON.parse(history[historyIndex]));
-    isUndoRedo=false;
-    statusEl.innerText="Undo";
-  }
+ if(historyIndex>0) {
+  historyIndex--;
+  isUndoRedo=true;
+  loadData(JSON.parse(history[historyIndex]));
+  isUndoRedo=false;
+  statusEl.innerText="Undo";
+ }
 }
 
 function deleteSelected() {
-  parts.forEach(p=>{ if(selectedParts.includes(p) && p.oscillator) p.oscillator.stop(); });
-  parts = parts.filter(p=>!selectedParts.includes(p));
-  wires = wires.filter(w=>!selectedParts.includes(w.source) && !selectedParts.includes(w.target));
-  selectedParts=[];
-  pushHistory();
+ parts.forEach(p=>{ if(selectedParts.includes(p) && p.oscillator) try {p.oscillator.stop();}catch(e){} });
+ parts = parts.filter(p=>!selectedParts.includes(p));
+ wires = wires.filter(w=>!selectedParts.includes(w.source) && !selectedParts.includes(w.target));
+ selectedParts=[];
+ pushHistory();
 }
 
 function copySelection() {
-  if(selectedParts.length===0) return;
-  const iWires = wires.filter(w=>selectedParts.includes(w.source)&&selectedParts.includes(w.target));
-  clipboard = {
-    parts: selectedParts.map(p=>{const c=Object.assign({},p); delete c.oscillator; return c;}),
-    wires: iWires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
-  };
+ if(selectedParts.length===0) return;
+ const iWires = wires.filter(w=>selectedParts.includes(w.source)&&selectedParts.includes(w.target));
+ clipboard = {
+  parts: selectedParts.map(p => {
+    const c = JSON.parse(JSON.stringify(p)); // 深いコピーで参照を切る
+    return c;
+  }),
+  wires: iWires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
+ };
 }
 
 function pasteSelection() {
-  if(!clipboard) return;
-  const center = toWorld(width/2, height/2);
-  let minX=Infinity, minY=Infinity;
-  clipboard.parts.forEach(p=>{if(p.x<minX)minX=p.x; if(p.y<minY)minY=p.y;});
+ if(!clipboard) return;
+ const center = toWorld(width/2, height/2);
+ let minX=Infinity, minY=Infinity;
+ clipboard.parts.forEach(p=>{if(p.x<minX)minX=p.x; if(p.y<minY)minY=p.y;});
   
-  selectedParts=[];
-  const map={};
-  clipboard.parts.forEach(p=>{
-    const np = new Part(p.type, 0, 0);
-    Object.assign(np, p);
-    np.id = 'p_'+Date.now()+'_'+Math.floor(Math.random()*100000);
-    np.x = center.x + (p.x - minX) - 50;
-    np.y = center.y + (p.y - minY) - 50;
-    if(p.data) np.data = [...p.data];
-    if(np.type === 'HexDisp' && np.digits) { np.def.in = np.digits*4; np.inputs = new Array(np.def.in).fill(false); }
-    if(np.type === 'Matrix' && np.rows) { np.def.in = np.rows+np.cols; np.inputs = new Array(np.def.in).fill(false); np.gridState = null; }
-    if(np.type === 'ColorMatrix' && np.rows) { np.def.in = np.rows+np.cols*3; np.inputs = new Array(np.def.in).fill(false); np.gridState = null; }
-    parts.push(np);
-    selectedParts.push(np);
-    map[p.id]=np;
-  });
+ selectedParts=[];
+ const map={};
+ clipboard.parts.forEach(p=>{
+  const np = new Part(p.type, 0, 0);
+  Object.assign(np, p);
+  np.id = 'p_'+Date.now()+'_'+Math.floor(Math.random()*100000);
+  np.x = center.x + (p.x - minX) - 50;
+  np.y = center.y + (p.y - minY) - 50;
+  if(p.data) np.data = [...p.data];
+  np.inputs = new Array(np.def.in).fill(false); // 参照を切るために再生成
+  np.outputs = new Array(np.def.out).fill(false);
+  if(np.type === 'HexDisp' && np.digits) { np.def.in = np.digits*4; np.inputs = new Array(np.def.in).fill(false); }
+  if(np.type === 'Matrix' && np.rows) { np.def.in = np.rows+np.cols; np.inputs = new Array(np.def.in).fill(false); np.gridState = null; }
+  if(np.type === 'ColorMatrix' && np.rows) { np.def.in = np.rows+np.cols*3; np.inputs = new Array(np.def.in).fill(false); np.gridState = null; }
+  parts.push(np);
+  selectedParts.push(np);
+  map[p.id]=np;
+ });
 
-  clipboard.wires.forEach(w=>{
-    const s=map[w.srcId], t=map[w.tgtId];
-    if(s&&t) wires.push({source:s, sourceIdx:w.srcIdx, target:t, targetIdx:w.tgtIdx, color:w.color});
-  });
-  pushHistory();
+ clipboard.wires.forEach(w=>{
+  const s=map[w.srcId], t=map[w.tgtId];
+  if(s&&t) wires.push({source:s, sourceIdx:w.srcIdx, target:t, targetIdx:w.tgtIdx, color:w.color});
+ });
+ pushHistory();
 }
 
 function setMode(m) {
-  mode=m;
-  document.querySelectorAll('.btn-mode').forEach(b=>b.classList.remove('active'));
-  if(m==='pointer')document.getElementById('btn-ptr').classList.add('active');
-  if(m==='pan')document.getElementById('btn-pan').classList.add('active');
-  if(m==='select')document.getElementById('btn-sel').classList.add('active');
+ mode=m;
+ document.querySelectorAll('.btn-mode').forEach(b=>b.classList.remove('active'));
+ if(m==='pointer')document.getElementById('btn-ptr').classList.add('active');
+ if(m==='pan')document.getElementById('btn-pan').classList.add('active');
+ if(m==='select')document.getElementById('btn-sel').classList.add('active');
 }
 
 function clearAll() {
-  if(!confirm(txt('confirm_clear'))) return;
-  parts.forEach(p=>{if(p.oscillator)p.oscillator.stop();});
-  parts=[]; wires=[]; selectedParts=[]; selectedWires=[]; customDefs={};
-  document.getElementById('user-chips-list').innerHTML='';
-  pushHistory();
+ if(!confirm(txt('confirm_clear'))) return;
+ parts.forEach(p=>{if(p.oscillator) try{p.oscillator.stop();}catch(e){}});
+ parts=[]; wires=[]; selectedParts=[]; selectedWires=[]; customDefs={};
+ document.getElementById('user-chips-list').innerHTML='';
+ pushHistory();
 }
 
 updateUIText();
@@ -1324,7 +1329,3 @@ loop();
 </script>
 </body>
 </html>
-
-
-
-
