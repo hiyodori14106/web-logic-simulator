@@ -134,9 +134,16 @@
       <button class="action-btn btn-save" onclick="saveFile()"><span data-i18n="btn_save">💾 保存</span></button>
       <button class="action-btn btn-save" onclick="document.getElementById('file-input').click()"><span data-i18n="btn_open">📂 開く</span></button>
     </div>
-    <button class="action-btn btn-clear" onclick="clearAll()"><span data-i18n="btn_clear">🗑 全消去</span></button>
-  </div>
-</div>
+  <button class="action-btn btn-clear" onclick="clearAll()"><span data-i18n="btn_clear">🗑 全消去</span></button>
+    
+    <!-- アクセスカウンター (Views) -->
+    <div style="margin-top: 15px; text-align: center; padding-bottom: 10px;">
+      <span style="font-size:12px; color:#aaa; margin-right:5px;">Total Views:</span>
+      <img src="https://visitor-badge.laobi.icu/badge?page_id=hiyodori14106.web-logic-simulator" alt="Visitor Count" style="vertical-align: middle;">
+    </div>
+
+  </div> <!-- tools-areaの終わり -->
+</div> <!-- sidebarの終わり -->
 
 <div id="canvas-container">
   <canvas id="circuitCanvas" tabindex="0"></canvas>
@@ -1317,5 +1324,6 @@ loop();
 </script>
 </body>
 </html>
+
 
 
