@@ -7,13 +7,27 @@
 <style>
  /* --- デザイン設定 --- */
  body { margin:0; overflow:hidden; background:#1e1e1e; font-family:'Meiryo', 'Segoe UI', sans-serif; display:flex; height:100vh; color:#ddd; }
-  
+ 
+ /* サイドバー配置切り替え用 */
+ body.sidebar-right { flex-direction: row-reverse; }
+
  /* サイドバー */
- #sidebar { width:280px; background:#252525; border-right:1px solid #333; display:flex; flex-direction:column; padding:10px; box-sizing:border-box; user-select:none; z-index:10; overflow-y:auto; }
+ #sidebar { width:280px; background:#252525; border-right:1px solid #333; border-left:1px solid #333; display:flex; flex-direction:column; padding:10px; box-sizing:border-box; user-select:none; z-index:20; overflow-y:auto; transition: width 0.3s, padding 0.3s; position: relative; }
+ #sidebar.collapsed { width: 0; padding: 0; overflow: hidden; border: none; }
  #sidebar::-webkit-scrollbar { width: 8px; }
  #sidebar::-webkit-scrollbar-track { background: #252525; }
  #sidebar::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
  #sidebar::-webkit-scrollbar-thumb:hover { background: #555; }
+
+ /* サイドバー制御ボタン */
+ .sidebar-controls { display: flex; gap: 5px; margin-bottom: 10px; }
+ .ctrl-small-btn { flex: 1; background: #444; color: #fff; border: 1px solid #555; padding: 4px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+ .ctrl-small-btn:hover { background: #555; }
+
+ /* 開閉ボタン (本体) */
+ #toggle-sidebar-btn { position: absolute; top: 50%; width: 24px; height: 60px; background: #333; color: white; border: 1px solid #444; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 30; transform: translateY(-50%); }
+ body:not(.sidebar-right) #toggle-sidebar-btn { right: -24px; border-radius: 0 4px 4px 0; }
+ body.sidebar-right #toggle-sidebar-btn { left: -24px; border-radius: 4px 0 0 4px; }
 
  .cat-title { font-size:12px; color:#aaa; margin:15px 0 5px 0; font-weight:bold; border-bottom:1px solid #444; padding-bottom:2px; }
  .cat-title:first-child { margin-top: 0; }
@@ -38,24 +52,23 @@
  .btn-clear { background:#d13438; width:100%; }
 
  /* キャンバス */
- #canvas-container { flex: 1; position: relative; cursor: default; overflow: hidden; background: #1e1e1e; }
- canvas { display: block; outline: none; }
+ #canvas-container { flex: 1; position: relative; cursor: default; overflow: auto; background: #1e1e1e; }
+ /* スクロールバー用仮想領域 */
+ #scroll-mock { position: absolute; top: 0; left: 0; pointer-events: none; }
+ canvas { display: block; outline: none; sticky: top: 0; left: 0; position: sticky; }
 
  /* ステータスバー */
- #status-bar { position:absolute; bottom:0; left:0; right:0; height:26px; background:#0078d4; color:white; font-size:12px; line-height:26px; padding:0 10px; opacity:0.95; display:flex; justify-content:space-between; pointer-events:none; }
+ #status-bar { position:fixed; bottom:0; left:0; right:0; height:26px; background:#0078d4; color:white; font-size:12px; line-height:26px; padding:0 10px; opacity:0.95; display:flex; justify-content:space-between; pointer-events:none; z-index:100; }
 
  /* モーダル (テキスト入出力) */
- #io-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:100; justify-content:center; align-items:center; }
+ #io-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:200; justify-content:center; align-items:center; }
  .modal-content { background: #2d2d2d; padding: 20px; border-radius: 8px; width: 600px; border: 1px solid #555; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
  .modal-content h3 { margin-top: 0; color: #fff; border-bottom: 1px solid #444; padding-bottom: 10px; }
  .modal-content textarea { width: 100%; height: 300px; background: #111; color: #0f0; border: 1px solid #444; font-family: monospace; font-size: 11px; margin-bottom: 10px; resize: vertical; box-sizing: border-box; padding: 5px; }
  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
  #file-input { display: none; }
 
- /* 言語切り替え */
  #lang-select { background: #333; color: #ddd; border: 1px solid #555; padding: 5px; width: 100%; margin-bottom: 10px; font-size: 12px; border-radius: 4px; }
-  
- /* 速度スライダー用 */
  .speed-control { padding: 0 5px 10px 5px; color:#ccc; font-size:12px; }
  .speed-control input { width: 100%; cursor: pointer; }
 </style>
@@ -63,6 +76,13 @@
 <body>
 
 <div id="sidebar">
+ <button id="toggle-sidebar-btn" onclick="toggleSidebar()">◀</button>
+ 
+ <div class="sidebar-controls">
+  <button class="ctrl-small-btn" onclick="toggleSidebarSide()" title="左右切り替え">↔ Side</button>
+  <button class="ctrl-small-btn" onclick="toggleSidebar()" title="閉じる">Close</button>
+ </div>
+
  <select id="lang-select" onchange="changeLanguage(this.value)">
   <option value="ja">🇯🇵 日本語</option>
   <option value="en">🇺🇸 English</option>
@@ -115,7 +135,6 @@
  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Joint')" onclick="addPart('Joint')"><span class="icon">🔗</span> <span data-i18n="part_joint">中継点 (Joint)</span></div>
  <div class="tool-btn" draggable="true" ondragstart="drag(event, 'Label')" onclick="addPart('Label')"><span class="icon">🏷️</span> <span data-i18n="part_label">ラベル</span></div>
 
- <!-- 速度調整エリア -->
  <div class="cat-title" data-i18n="cat_speed">シミュレーション速度</div>
  <div class="speed-control">
   <input id="speed-slider" type="range" min="1" max="5000" value="1" step="1" oninput="changeSpeed(this.value)">
@@ -136,16 +155,15 @@
   </div>
  <button class="action-btn btn-clear" onclick="clearAll()"><span data-i18n="btn_clear">🗑 全消去</span></button>
    
-  <!-- アクセスカウンター (Views) -->
   <div style="margin-top: 15px; text-align: center; padding-bottom: 10px;">
    <span style="font-size:12px; color:#aaa; margin-right:5px;">Total Views:</span>
    <img src="https://visitor-badge.laobi.icu/badge?page_id=hiyodori14106.web-logic-simulator" alt="Visitor Count" style="vertical-align: middle;">
   </div>
-
- </div> <!-- tools-areaの終わり -->
-</div> <!-- sidebarの終わり -->
+ </div>
+</div>
 
 <div id="canvas-container">
+ <div id="scroll-mock"></div>
  <canvas id="circuitCanvas" tabindex="0"></canvas>
  <div id="status-bar">
   <span id="status-text">Ready</span>
@@ -269,7 +287,6 @@ const TRANSLATIONS = {
 };
 
 let currentLang = 'ja';
-// ブラウザの言語設定を確認
 const navLang = navigator.language.slice(0,2);
 if(TRANSLATIONS[navLang]) currentLang = navLang;
 
@@ -343,6 +360,71 @@ let clipboard = null;
 let isSpacePressed = false;
 let hasDraggedPart = false;
 let globalTick = 0;
+
+// --- スクロール同期用の関数 ---
+const scrollMock = document.getElementById('scroll-mock');
+const V_LIMIT = 5000; // 仮想空間の大きさ（片側）
+let isSyncingScroll = false;
+
+function updateScrollbars() {
+ if(isSyncingScroll) return;
+ isSyncingScroll = true;
+ 
+ // 回路の部品がある範囲を計算
+ let minX = 0, maxX = 0, minY = 0, maxY = 0;
+ parts.forEach(p => {
+  minX = Math.min(minX, p.x);
+  maxX = Math.max(maxX, p.x + p.w);
+  minY = Math.min(minY, p.y);
+  maxY = Math.max(maxY, p.y + p.h);
+ });
+
+ // 十分な余白を持たせる
+ const padding = 1000;
+ const contentW = (maxX - minX + padding * 2) * view.scale;
+ const contentH = (maxY - minY + padding * 2) * view.scale;
+
+ scrollMock.style.width = contentW + 'px';
+ scrollMock.style.height = contentH + 'px';
+
+ // スクロール位置をview.x/yに同期 (中央基準)
+ container.scrollLeft = (padding - view.x) * view.scale;
+ container.scrollTop = (padding - view.y) * view.scale;
+ isSyncingScroll = false;
+}
+
+container.addEventListener('scroll', () => {
+ if(isSyncingScroll) return;
+ isSyncingScroll = true;
+ const padding = 1000;
+ view.x = padding - (container.scrollLeft / view.scale);
+ view.y = padding - (container.scrollTop / view.scale);
+ isSyncingScroll = false;
+});
+
+function toggleSidebar() {
+ const sb = document.getElementById('sidebar');
+ const btn = document.getElementById('toggle-sidebar-btn');
+ sb.classList.toggle('collapsed');
+ if(sb.classList.contains('collapsed')) {
+  btn.innerText = document.body.classList.contains('sidebar-right') ? "◀" : "▶";
+ } else {
+  btn.innerText = document.body.classList.contains('sidebar-right') ? "▶" : "◀";
+ }
+ resize();
+}
+
+function toggleSidebarSide() {
+ document.body.classList.toggle('sidebar-right');
+ const btn = document.getElementById('toggle-sidebar-btn');
+ const isCollapsed = document.getElementById('sidebar').classList.contains('collapsed');
+ if(isCollapsed) {
+  btn.innerText = document.body.classList.contains('sidebar-right') ? "◀" : "▶";
+ } else {
+  btn.innerText = document.body.classList.contains('sidebar-right') ? "▶" : "◀";
+ }
+ resize();
+}
 
 function toWorld(sx, sy) { return { x: (sx - view.x) / view.scale, y: (sy - view.y) / view.scale }; }
 function snap(v) { return Math.round(v/GRID)*GRID; }
@@ -732,10 +814,7 @@ class Part {
      ctx.beginPath();
      ctx.arc(this.x + pad + x*cSize + cSize/2, this.y + pad + y*rSize + rSize/2, rad, 0, Math.PI*2);
      if (p && (p.r > 0.1 || p.g > 0.1 || p.b > 0.1)) {
-      const r = Math.min(255, Math.floor(p.r*255));
-      const g = Math.min(255, Math.floor(p.g*255));
-      const b = Math.min(255, Math.floor(p.b*255));
-      ctx.fillStyle = `rgb(${},${},${})`;
+      ctx.fillStyle = `rgb(${Math.floor(p.r*255)},${Math.floor(p.g*255)},${Math.floor(p.b*255)})`;
      } else {
       ctx.fillStyle = '#111';
      }
@@ -757,7 +836,7 @@ class Part {
   }
   if(this.type==='ColorLED' && this.active) {
    const r=this.inputs[0]?255:0, g=this.inputs[1]?255:0, b=this.inputs[2]?255:0;
-   ctx.fillStyle=`rgb(${},${},${})`;
+   ctx.fillStyle=`rgb(${r},${g},${b})`;
    ctx.beginPath(); ctx.arc(this.x+this.w/2, this.y+this.h/2, 12, 0, Math.PI*2); ctx.fill();
   }
 
@@ -824,6 +903,7 @@ function resize() {
  height=container.clientHeight;
  canvas.width=width;
  canvas.height=height;
+ updateScrollbars();
 }
 window.onresize = resize;
 resize();
@@ -924,14 +1004,15 @@ canvas.addEventListener('drop', e => { e.preventDefault(); const type = e.dataTr
 
 function addPart(type, cx, cy) {
  let wPos;
+ const r = canvas.getBoundingClientRect();
  if(cx && cy) {
-  const r = canvas.getBoundingClientRect();
   wPos = toWorld(cx - r.left, cy - r.top);
  } else {
   wPos = toWorld(width/2, height/2);
  }
  parts.push(new Part(type, wPos.x - 20, wPos.y - 20));
  pushHistory();
+ updateScrollbars();
  statusEl.innerText = txt('status_placed', type);
 }
 
@@ -943,6 +1024,7 @@ function deletePartAt(cx, cy) {
   parts = parts.filter(p => p !== hit);
   wires = wires.filter(wire => wire.source !== hit && wire.target !== hit);
   pushHistory();
+  updateScrollbars();
   return;
  }
  const hitWire = hitTestWire(w.x, w.y);
@@ -996,7 +1078,7 @@ canvas.addEventListener('mousemove', e => {
  mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
  const w = toWorld(mouse.x, mouse.y);
 
- if(state === STATE.PANNING) { view.x += dx; view.y += dy; }
+ if(state === STATE.PANNING) { view.x += dx; view.y += dy; updateScrollbars(); }
  else if(state === STATE.DRAGGING) {
   if(Math.hypot(mouse.x - mouse.dragStartX, mouse.y - mouse.dragStartY) > 5) {
    hasDraggedPart = true;
@@ -1028,7 +1110,7 @@ canvas.addEventListener('mouseup', e => {
    if(mouse.downPart.type === 'Switch') { mouse.downPart.active = !mouse.downPart.active; pushHistory(); }
   }
   if(mouse.downPart && (mouse.downPart.type==='Button'||mouse.downPart.type==='KeyInput')) { mouse.downPart.active = false; }
-  if(hasDraggedPart) pushHistory();
+  if(hasDraggedPart) { pushHistory(); updateScrollbars(); }
   state = STATE.IDLE;
  }
  else if(state === STATE.WIRING && targetPort) {
@@ -1088,7 +1170,7 @@ function editPart(hit) {
    changed=true;
   }
  }
- if(changed) pushHistory();
+ if(changed) { pushHistory(); updateScrollbars(); }
 }
 
 window.addEventListener('keydown', e => {
@@ -1137,8 +1219,9 @@ canvas.addEventListener('wheel', e => {
   view.x -= wx * (newScale - view.scale);
   view.y -= wy * (newScale - view.scale);
   view.scale = newScale;
+  updateScrollbars();
  }
-});
+}, {passive: false});
 
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -1178,7 +1261,7 @@ function addChipToSidebar(name) {
  const div = document.createElement('div');
  div.className = 'tool-btn';
  div.draggable = true;
- div.innerHTML = `<span class="icon">🧩</span> ${}`;
+ div.innerHTML = `<span class="icon">🧩</span> ${name}`;
  div.onclick = () => addPart(name);
  div.ondragstart = (e) => drag(e, name);
  list.appendChild(div);
@@ -1231,6 +1314,7 @@ function loadData(d) {
   const t = parts.find(p=>p.id===w.tgtId);
   if(s && t) wires.push({ source:s, sourceIdx:w.srcIdx, target:t, targetIdx:w.tgtIdx, color:w.color });
  });
+ updateScrollbars();
 }
 
 function pushHistory() {
@@ -1262,6 +1346,7 @@ function deleteSelected() {
  wires = wires.filter(w=>!selectedParts.includes(w.source) && !selectedParts.includes(w.target));
  selectedParts=[];
  pushHistory();
+ updateScrollbars();
 }
 
 function copySelection() {
@@ -1269,8 +1354,7 @@ function copySelection() {
  const iWires = wires.filter(w=>selectedParts.includes(w.source)&&selectedParts.includes(w.target));
  clipboard = {
   parts: selectedParts.map(p => {
-    const c = JSON.parse(JSON.stringify(p)); // 深いコピーで参照を切る
-    return c;
+    return JSON.parse(JSON.stringify(p)); 
   }),
   wires: iWires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
  };
@@ -1291,7 +1375,7 @@ function pasteSelection() {
   np.x = center.x + (p.x - minX) - 50;
   np.y = center.y + (p.y - minY) - 50;
   if(p.data) np.data = [...p.data];
-  np.inputs = new Array(np.def.in).fill(false); // 参照を切るために再生成
+  np.inputs = new Array(np.def.in).fill(false); 
   np.outputs = new Array(np.def.out).fill(false);
   if(np.type === 'HexDisp' && np.digits) { np.def.in = np.digits*4; np.inputs = new Array(np.def.in).fill(false); }
   if(np.type === 'Matrix' && np.rows) { np.def.in = np.rows+np.cols; np.inputs = new Array(np.def.in).fill(false); np.gridState = null; }
@@ -1306,6 +1390,7 @@ function pasteSelection() {
   if(s&&t) wires.push({source:s, sourceIdx:w.srcIdx, target:t, targetIdx:w.tgtIdx, color:w.color});
  });
  pushHistory();
+ updateScrollbars();
 }
 
 function setMode(m) {
@@ -1322,9 +1407,11 @@ function clearAll() {
  parts=[]; wires=[]; selectedParts=[]; selectedWires=[]; customDefs={};
  document.getElementById('user-chips-list').innerHTML='';
  pushHistory();
+ updateScrollbars();
 }
 
 updateUIText();
+updateScrollbars();
 loop();
 </script>
 </body>
