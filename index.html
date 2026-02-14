@@ -228,11 +228,11 @@ const TRANSLATIONS = {
     btn_create_ic: "⚡ 选区转 IC", btn_mode_ptr: "👆 操作", btn_mode_pan: "✋ 移动", btn_mode_sel: "⛝ 选择",
     btn_share: "📋 分享文本数据", btn_save: "💾 保存", btn_open: "📂 打开", btn_clear: "🗑 清空",
     modal_title: "电路数据 (JSON)", btn_close: "关闭", btn_copy: "复制", btn_load: "加载",
-    placeholder_json: "在此粘贴 JSON 数据...", default_text: "文本",
-    prompt_rom: "ROM 数据 (16个16进制数，空格分隔):", prompt_key: "分配按键:", confirm_toggle: "启用切换模式吗?",
+    placeholder_json: "在此粘贴 JSON データ...", default_text: "文本",
+    prompt_rom: "ROM データ (16个16进制数，空格分隔):", prompt_key: "分配按键:", confirm_toggle: "启用切换模式吗?",
     prompt_digits: "位数 (1-8):", prompt_rows: "行数:", prompt_cols: "列数:", prompt_size: "总宽度(px) (留空自动: $px)", prompt_label: "标签 / 值:",
     alert_select_chip: "请选择要转换为 IC 的元件。", prompt_chip_name: "输入芯片名称:", confirm_no_pins: "未选择输入/输出引脚。继续吗？",
-    status_ic_created: "IC 芯片 [$] 已创建。", status_placed: "已放置 $", alert_copied: "已复制到剪貼板。", alert_invalid: "数据无效。", confirm_clear: "确定要清空所有内容吗？",
+    status_ic_created: "IC 芯片 [$] 已创建。", status_placed: "已放置 $", alert_copied: "已复制到剪贴板。", alert_invalid: "データ无效。", confirm_clear: "确定要清空所有内容吗？",
   }
 };
 
@@ -404,26 +404,25 @@ class Part {
 
   initCustomState(def) {
     const map = {};
-    const parts = def.parts.map(p => {
+    const partsList = def.parts.map(p => {
       const np = new Part(p.type, 0, 0);
       Object.assign(np, p);
+      if (p.data) np.data = [...p.data];
       np.inputs = new Array(np.def.in).fill(false);
       np.outputs = new Array(np.def.out).fill(false);
-      if(np.type==='RAM') np.data = new Array(16).fill(0);
       map[p.id] = np;
       return np;
     });
-    const wires = def.wires.map(w => ({
+    const wiresList = def.wires.map(w => ({
       source: map[w.srcId],
       sourceIdx: w.srcIdx,
       target: map[w.tgtId],
-      targetIdx: w.tgtIdx,
-      color: w.color
+      targetIdx: w.tgtIdx
     })).filter(w => w.source && w.target);
 
-    const inPins = parts.filter(p => p.type==='PinIn').sort((a,b)=>a.y-b.y);
-    const outPins = parts.filter(p => p.type==='PinOut').sort((a,b)=>a.y-b.y);
-    return { parts, wires, inPins, outPins };
+    const inPins = partsList.filter(p => p.type==='PinIn').sort((a,b)=>a.y-b.y);
+    const outPins = partsList.filter(p => p.type==='PinOut').sort((a,b)=>a.y-b.y);
+    return { parts: partsList, wires: wiresList, inPins, outPins };
   }
 
   update(tick) {
@@ -452,11 +451,9 @@ class Part {
   }
 
   updateInternal(localWires, tick) {
-    if (this.type !== 'PinIn') {
-      for(let i=0; i<this.inputs.length; i++) {
-        const w = localWires.find(w => w.target === this && w.targetIdx === i);
-        this.inputs[i] = w ? w.source.outputs[w.sourceIdx] : false;
-      }
+    for(let i=0; i<this.inputs.length; i++) {
+      const w = localWires.find(w => w.target === this && w.targetIdx === i);
+      this.inputs[i] = w ? w.source.outputs[w.sourceIdx] : false;
     }
     if(this.isCustom) this.updateCustom(tick);
     else this.updateStandard(tick);
@@ -468,7 +465,7 @@ class Part {
       case 'Switch': case 'Button': case 'KeyInput': case 'PinIn': case 'PinOut': case 'Label': break;
       case 'Joint': this.outputs[0] = ins[0]; break;
       case 'Clock': 
-        if(tick - this.lastToggle >= (this.interval || 1)) {
+        if(tick - this.lastToggle >= (this.interval || 10)) {
           this.active = !this.active;
           this.lastToggle = tick;
         }
@@ -534,7 +531,7 @@ class Part {
         const wa=(ins[4]?1:0)+(ins[5]?2:0)+(ins[6]?4:0)+(ins[7]?8:0);
         if(!this.lastClk && ins[9] && ins[8]) this.data[wa]=wd;
         this.lastClk=ins[9];
-        const rv=this.data[wa];
+        const rv=this.data[wa] || 0;
         this.outputs[0]=(rv&1)!=0;
         this.outputs[1]=(rv&2)!=0;
         this.outputs[2]=(rv&4)!=0;
@@ -554,8 +551,8 @@ class Part {
       case 'Matrix': case 'ColorMatrix': {
         const totalPixels = this.rows * this.cols;
         if (!this.gridState || this.gridState.length !== totalPixels) {
-          if(this.type === 'Matrix') this.gridState = new Array(totalPixels).fill(0);
-          else this.gridState = new Array(totalPixels).fill(null).map(()=>({r:0,g:0,b:0}));
+          if(this.type === 'Matrix') this.gridState = new Float32Array(totalPixels).fill(0);
+          else this.gridState = Array.from({length:totalPixels}, ()=>({r:0,g:0,b:0}));
         }
         if (this.type === 'Matrix') {
           for(let r=0; r<this.rows; r++) {
@@ -603,7 +600,7 @@ class Part {
       }
     } else {
       if(this.oscillator){
-        this.oscillator.stop();
+        try{this.oscillator.stop();}catch(e){}
         this.oscillator.disconnect();
         this.gainNode.disconnect();
         this.oscillator=null;
@@ -657,7 +654,8 @@ class Part {
       ctx.stroke();
     } else {
       ctx.beginPath();
-      ctx.roundRect(this.x, this.y, this.w, this.h, 4);
+      if(ctx.roundRect) ctx.roundRect(this.x, this.y, this.w, this.h, 4);
+      else ctx.rect(this.x, this.y, this.w, this.h);
       ctx.fill();
       ctx.shadowBlur=0; 
       ctx.shadowOffsetY=0;
@@ -682,10 +680,10 @@ class Part {
       const digits = this.digits || 1;
       const oneW = this.w / digits;
       for(let d=0; d<digits; d++) {
-        const idx = (digits - 1 - d) * 4;
+        const idx = d * 4;
         const val = (this.inputs[idx]?8:0)+(this.inputs[idx+1]?4:0)+(this.inputs[idx+2]?2:0)+(this.inputs[idx+3]?1:0);
         const segs = segsDat[val];
-        const cx = this.x + d * oneW + oneW/2;
+        const cx = this.x + this.w - (oneW/2) - (d * oneW);
         const cy = this.y + this.h/2;
         const s = Math.min(8, oneW/4);
         ctx.lineWidth=3; ctx.lineCap='round';
@@ -700,14 +698,16 @@ class Part {
       const rSize = (this.h - pad*2) / R;
       const cSize = (this.w - pad*2) / C;
       const rad = Math.min(rSize, cSize) * 0.35;
-      const gs = this.gridState || new Array(R*C).fill(0);
-      for(let y=0; y<R; y++) {
-        for(let x=0; x<C; x++) {
-          const val = gs[y*C + x];
-          ctx.beginPath();
-          ctx.arc(this.x + pad + x*cSize + cSize/2, this.y + pad + y*rSize + rSize/2, rad, 0, Math.PI*2);
-          ctx.fillStyle = val > 0.1 ? `rgba(255,0,0,${Math.min(1, val)})` : '#311';
-          ctx.fill();
+      const gs = this.gridState;
+      if(gs) {
+        for(let y=0; y<R; y++) {
+          for(let x=0; x<C; x++) {
+            const val = gs[y*C + x];
+            ctx.beginPath();
+            ctx.arc(this.x + pad + x*cSize + cSize/2, this.y + pad + y*rSize + rSize/2, rad, 0, Math.PI*2);
+            ctx.fillStyle = val > 0.1 ? `rgba(255,0,0,${Math.min(1, val)})` : '#311';
+            ctx.fill();
+          }
         }
       }
     } else if(this.type==='ColorMatrix') {
@@ -717,21 +717,23 @@ class Part {
       const rSize = (this.h - pad*2) / R;
       const cSize = (this.w - pad*2) / C;
       const rad = Math.min(rSize, cSize) * 0.35;
-      const gs = this.gridState || new Array(R*C).fill(0).map(()=>({r:0,g:0,b:0}));
-      for(let y=0; y<R; y++) {
-        for(let x=0; x<C; x++) {
-          const p = gs[y*C + x];
-          ctx.beginPath();
-          ctx.arc(this.x + pad + x*cSize + cSize/2, this.y + pad + y*rSize + rSize/2, rad, 0, Math.PI*2);
-          if (p && (p.r > 0.1 || p.g > 0.1 || p.b > 0.1)) {
-            const r = Math.min(255, Math.floor(p.r*255));
-            const g = Math.min(255, Math.floor(p.g*255));
-            const b = Math.min(255, Math.floor(p.b*255));
-            ctx.fillStyle = `rgb(${r},${g},${b})`;
-          } else {
-            ctx.fillStyle = '#111';
+      const gs = this.gridState;
+      if(gs) {
+        for(let y=0; y<R; y++) {
+          for(let x=0; x<C; x++) {
+            const p = gs[y*C + x];
+            ctx.beginPath();
+            ctx.arc(this.x + pad + x*cSize + cSize/2, this.y + pad + y*rSize + rSize/2, rad, 0, Math.PI*2);
+            if (p && (p.r > 0.1 || p.g > 0.1 || p.b > 0.1)) {
+              const r = Math.min(255, Math.floor(p.r*255));
+              const g = Math.min(255, Math.floor(p.g*255));
+              const b = Math.min(255, Math.floor(p.b*255));
+              ctx.fillStyle = `rgb(${r},${g},${b})`;
+            } else {
+              ctx.fillStyle = '#111';
+            }
+            ctx.fill();
           }
-          ctx.fill();
         }
       }
     } else if(this.type==='Label') {
@@ -890,14 +892,15 @@ function loop() {
 }
 
 function hitTestWire(mx, my) {
-  const threshold = 5 / view.scale;
+  const threshold = 6 / view.scale;
   for(let w of wires) {
     const p1 = w.source.getPortPos(false, w.sourceIdx);
     if (w.targetIdx >= w.target.inputs.length) continue;
     const p2 = w.target.getPortPos(true, w.targetIdx);
+    const cp1x = p1.x+30, cp1y = p1.y, cp2x = p2.x-30, cp2y = p2.y;
     for(let t=0; t<=1; t+=0.05) {
-      const x = (1-t)*(1-t)*(1-t)*p1.x + 3*(1-t)*(1-t)*t*(p1.x+30) + 3*(1-t)*t*t*(p2.x-30) + t*t*t*p2.x;
-      const y = (1-t)*(1-t)*(1-t)*p1.y + 3*(1-t)*(1-t)*t*(p1.y) + 3*(1-t)*t*t*(p2.y) + t*t*t*p2.y;
+      const x = (1-t)**3 * p1.x + 3*(1-t)**2 * t * cp1x + 3*(1-t)*t**2 * cp2x + t**3 * p2.x;
+      const y = (1-t)**3 * p1.y + 3*(1-t)**2 * t * cp1y + 3*(1-t)*t**2 * cp2y + t**3 * p2.y;
       if(Math.hypot(mx-x, my-y) < threshold) return w;
     }
   }
@@ -928,7 +931,7 @@ function deletePartAt(cx, cy) {
   const w = toWorld(cx, cy);
   const hit = parts.slice().reverse().find(p => p.hitTest(w.x, w.y));
   if(hit) {
-    if(hit.oscillator) hit.oscillator.stop();
+    if(hit.oscillator) try{hit.oscillator.stop();}catch(e){}
     parts = parts.filter(p => p !== hit);
     wires = wires.filter(wire => wire.source !== hit && wire.target !== hit);
     pushHistory();
@@ -1142,7 +1145,8 @@ function createCustomChip() {
   const chipParts = selectedParts.map(p => ({
     id: p.id, type: p.type, x: p.x - minX, y: p.y - minY,
     label: p.label, interval: p.interval, delayTime: p.delayTime, freq: p.freq,
-    assignedKey: p.assignedKey, data: p.data, digits: p.digits, rows: p.rows, cols: p.cols
+    assignedKey: p.assignedKey, data: p.data ? [...p.data] : undefined, 
+    digits: p.digits, rows: p.rows, cols: p.cols
   }));
   const chipWires = wires.filter(w => selectedParts.includes(w.source) && selectedParts.includes(w.target)).map(w => ({
     srcId: w.source.id, srcIdx: w.sourceIdx, tgtId: w.target.id, tgtIdx: w.targetIdx, color: w.color
@@ -1172,7 +1176,7 @@ function addChipToSidebar(name) {
 function openIO() {
   const data = {
     customDefs,
-    parts: parts.map(p=>({ id:p.id, type:p.type, x:p.x, y:p.y, label:p.label, assignedKey:p.assignedKey, data:p.data, digits:p.digits, rows:p.rows, cols:p.cols, interval:p.interval })),
+    parts: parts.map(p=>({ id:p.id, type:p.type, x:p.x, y:p.y, label:p.label, assignedKey:p.assignedKey, data:p.data, digits:p.digits, rows:p.rows, cols:p.cols, interval:p.interval, delayTime:p.delayTime, freq:p.freq })),
     wires: wires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
   };
   ioText.value = JSON.stringify(data);
@@ -1186,20 +1190,31 @@ function loadFile(input) {
   const file = input.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => { loadData(JSON.parse(e.target.result)); history=[]; pushHistory(); };
+  reader.onload = (e) => { try { loadData(JSON.parse(e.target.result)); history=[]; pushHistory(); } catch(err) { alert(txt('alert_invalid')); } };
   reader.readAsText(file);
   input.value = '';
 }
-function saveFile() { openIO(); }
+function saveFile() { 
+  const data = {
+    customDefs,
+    parts: parts.map(p=>({ id:p.id, type:p.type, x:p.x, y:p.y, label:p.label, assignedKey:p.assignedKey, data:p.data, digits:p.digits, rows:p.rows, cols:p.cols, interval:p.interval, delayTime:p.delayTime, freq:p.freq })),
+    wires: wires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
+  };
+  const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'circuit.json'; a.click();
+}
 
 function loadData(d) {
   customDefs = d.customDefs || {};
   document.getElementById('user-chips-list').innerHTML = '';
   Object.keys(customDefs).forEach(name => addChipToSidebar(name));
+  parts.forEach(p => { if(p.oscillator) try{p.oscillator.stop();}catch(e){} });
   parts = []; wires = [];
   if(d.parts) d.parts.forEach(p => {
     const np = new Part(p.type, p.x, p.y);
     Object.assign(np, p);
+    if (p.data) np.data = [...p.data];
     if(np.type === 'HexDisp' && np.digits) { np.def.in = np.digits*4; np.inputs = new Array(np.def.in).fill(false); np.w = 50*np.digits; }
     if(np.type === 'Matrix' && np.rows) { np.def.in = np.rows+np.cols; np.inputs = new Array(np.def.in).fill(false); }
     if(np.type === 'ColorMatrix' && np.rows) { np.def.in = np.rows+np.cols*3; np.inputs = new Array(np.def.in).fill(false); }
@@ -1217,7 +1232,7 @@ function pushHistory() {
   if(isUndoRedo) return;
   const stateStr = JSON.stringify({
     customDefs,
-    parts: parts.map(p=>({ id:p.id, type:p.type, x:p.x, y:p.y, label:p.label, assignedKey:p.assignedKey, data:p.data, digits:p.digits, rows:p.rows, cols:p.cols, interval:p.interval })),
+    parts: parts.map(p=>({ id:p.id, type:p.type, x:p.x, y:p.y, label:p.label, assignedKey:p.assignedKey, data:p.data, digits:p.digits, rows:p.rows, cols:p.cols, interval:p.interval, delayTime:p.delayTime, freq:p.freq })),
     wires: wires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
   });
   if(historyIndex < history.length-1) history = history.slice(0, historyIndex+1);
@@ -1231,7 +1246,7 @@ function undo() {
 }
 
 function deleteSelected() {
-  parts.forEach(p=>{ if(selectedParts.includes(p) && p.oscillator) p.oscillator.stop(); });
+  parts.forEach(p=>{ if(selectedParts.includes(p) && p.oscillator) try{p.oscillator.stop();}catch(e){} });
   parts = parts.filter(p=>!selectedParts.includes(p));
   wires = wires.filter(w=>!selectedParts.includes(w.source) && !selectedParts.includes(w.target));
   selectedParts=[];
@@ -1242,7 +1257,12 @@ function copySelection() {
   if(selectedParts.length===0) return;
   const iWires = wires.filter(w=>selectedParts.includes(w.source)&&selectedParts.includes(w.target));
   clipboard = {
-    parts: selectedParts.map(p=>{const c=Object.assign({},p); delete c.oscillator; return c;}),
+    parts: selectedParts.map(p => {
+        const c = Object.assign({}, p);
+        if(p.data) c.data = [...p.data];
+        delete c.oscillator; delete c.internalState; delete c.gridState;
+        return c;
+    }),
     wires: iWires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
   };
 }
@@ -1285,7 +1305,7 @@ function setMode(m) {
 
 function clearAll() {
   if(!confirm(txt('confirm_clear'))) return;
-  parts.forEach(p=>{if(p.oscillator)p.oscillator.stop();});
+  parts.forEach(p=>{if(p.oscillator)try{p.oscillator.stop();}catch(e){}});
   parts=[]; wires=[]; selectedParts=[]; selectedWires=[]; customDefs={};
   document.getElementById('user-chips-list').innerHTML='';
   pushHistory();
