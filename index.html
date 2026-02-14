@@ -232,7 +232,7 @@ const TRANSLATIONS = {
     prompt_rom: "ROM 数据 (16个16进制数，空格分隔):", prompt_key: "分配按键:", confirm_toggle: "启用切换模式吗?",
     prompt_digits: "位数 (1-8):", prompt_rows: "行数:", prompt_cols: "列数:", prompt_size: "总宽度(px) (留空自动: $px)", prompt_label: "标签 / 值:",
     alert_select_chip: "请选择要转换为 IC 的元件。", prompt_chip_name: "输入芯片名称:", confirm_no_pins: "未选择输入/输出引脚。继续吗？",
-    status_ic_created: "IC 芯片 [$] 已创建。", status_placed: "已放置 $", alert_copied: "已复制到剪贴板。", alert_invalid: "数据无效。", confirm_clear: "确定要清空所有内容吗？",
+    status_ic_created: "IC 芯片 [$] 已创建。", status_placed: "已放置 $", alert_copied: "已复制到剪貼板。", alert_invalid: "数据无效。", confirm_clear: "确定要清空所有内容吗？",
   }
 };
 
@@ -417,7 +417,8 @@ class Part {
       source: map[w.srcId],
       sourceIdx: w.srcIdx,
       target: map[w.tgtId],
-      targetIdx: w.tgtIdx
+      targetIdx: w.tgtIdx,
+      color: w.color
     })).filter(w => w.source && w.target);
 
     const inPins = parts.filter(p => p.type==='PinIn').sort((a,b)=>a.y-b.y);
@@ -451,9 +452,11 @@ class Part {
   }
 
   updateInternal(localWires, tick) {
-    for(let i=0; i<this.def.in; i++) {
-      const w = localWires.find(w => w.target === this && w.targetIdx === i);
-      this.inputs[i] = w ? w.source.outputs[w.sourceIdx] : false;
+    if (this.type !== 'PinIn') {
+      for(let i=0; i<this.inputs.length; i++) {
+        const w = localWires.find(w => w.target === this && w.targetIdx === i);
+        this.inputs[i] = w ? w.source.outputs[w.sourceIdx] : false;
+      }
     }
     if(this.isCustom) this.updateCustom(tick);
     else this.updateStandard(tick);
@@ -624,13 +627,15 @@ class Part {
       ctx.strokeStyle = isSel ? COLORS.select : '#333';
       const decay = 0.85;
       const total = (this.rows||8) * (this.cols||8);
-      if(this.type==='Matrix') {
-        for(let i=0;i<total;i++) this.gridState[i] *= decay;
-      } else {
-        for(let i=0;i<total;i++) {
-          this.gridState[i].r *= decay;
-          this.gridState[i].g *= decay;
-          this.gridState[i].b *= decay;
+      if(this.gridState) {
+        if(this.type==='Matrix') {
+          for(let i=0;i<total;i++) this.gridState[i] *= decay;
+        } else {
+          for(let i=0;i<total;i++) {
+            this.gridState[i].r *= decay;
+            this.gridState[i].g *= decay;
+            this.gridState[i].b *= decay;
+          }
         }
       }
     } else if(this.isCustom || this.type==='RAM' || this.type==='ROM') {
@@ -677,10 +682,10 @@ class Part {
       const digits = this.digits || 1;
       const oneW = this.w / digits;
       for(let d=0; d<digits; d++) {
-        const idx = d * 4;
+        const idx = (digits - 1 - d) * 4;
         const val = (this.inputs[idx]?8:0)+(this.inputs[idx+1]?4:0)+(this.inputs[idx+2]?2:0)+(this.inputs[idx+3]?1:0);
         const segs = segsDat[val];
-        const cx = this.x + this.w - (oneW/2) - (d * oneW);
+        const cx = this.x + d * oneW + oneW/2;
         const cy = this.y + this.h/2;
         const s = Math.min(8, oneW/4);
         ctx.lineWidth=3; ctx.lineCap='round';
