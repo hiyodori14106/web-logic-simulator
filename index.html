@@ -21,7 +21,7 @@
 
  /* サイドバー制御ボタン */
  .sidebar-controls { display: flex; gap: 5px; margin-bottom: 10px; }
- .ctrl-small-btn { flex: 1; background: #444; color: #fff; border: 1px solid #555; padding: 4px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+ .ctrl-small-btn { flex: 1; background: #444; color: #fff; border: 1px solid #555; padding: 6px; cursor: pointer; border-radius: 4px; font-size: 12px; }
  .ctrl-small-btn:hover { background: #555; }
 
  /* 開閉ボタン (本体) */
@@ -53,9 +53,8 @@
 
  /* キャンバス */
  #canvas-container { flex: 1; position: relative; cursor: default; overflow: auto; background: #1e1e1e; }
- /* スクロールバー用仮想領域 */
  #scroll-mock { position: absolute; top: 0; left: 0; pointer-events: none; }
- canvas { display: block; outline: none; sticky: top: 0; left: 0; position: sticky; }
+ canvas { display: block; outline: none; position: sticky; top: 0; left: 0; z-index: 5; }
 
  /* ステータスバー */
  #status-bar { position:fixed; bottom:0; left:0; right:0; height:26px; background:#0078d4; color:white; font-size:12px; line-height:26px; padding:0 10px; opacity:0.95; display:flex; justify-content:space-between; pointer-events:none; z-index:100; }
@@ -79,8 +78,8 @@
  <button id="toggle-sidebar-btn" onclick="toggleSidebar()">◀</button>
  
  <div class="sidebar-controls">
-  <button class="ctrl-small-btn" onclick="toggleSidebarSide()" title="左右切り替え">↔ Side</button>
-  <button class="ctrl-small-btn" onclick="toggleSidebar()" title="閉じる">Close</button>
+  <button class="ctrl-small-btn" onclick="toggleSidebarSide()" title="左右切り替え">↔ <span data-i18n="btn_side">Side</span></button>
+  <button class="ctrl-small-btn" onclick="toggleSidebar()" title="閉じる">✕ <span data-i18n="btn_close_sb">Close</span></button>
  </div>
 
  <select id="lang-select" onchange="changeLanguage(this.value)">
@@ -203,6 +202,7 @@ const TRANSLATIONS = {
   prompt_digits: "桁数 (1-8):", prompt_rows: "行数 (Rows):", prompt_cols: "列数 (Cols):", prompt_size: "全体の幅(px)を設定 (空欄で自動: $px にリサイズ)", prompt_label: "ラベル / 値:",
   alert_select_chip: "チップ化する部品を選択してください", prompt_chip_name: "チップ名を入力:", confirm_no_pins: "入出力ピンが含まれていません。続行しますか？",
   status_ic_created: "ICチップ [$] を作成しました", status_placed: "$ を配置しました", alert_copied: "コピーしました", alert_invalid: "データが無効です", confirm_clear: "本当に全て消去しますか？",
+  btn_side: "サイド", btn_close_sb: "閉じる", status_ready: "準備完了", status_undo: "元に戻す"
  },
  en: {
   cat_user_chips: "User Chips (IC)", cat_ic_parts: "IC Parts", cat_input: "Input (INPUT)", cat_output: "Output (OUTPUT)", cat_gates: "Logic Gates (GATES)", cat_memory: "Memory / CPU", cat_other: "Others",
@@ -219,6 +219,7 @@ const TRANSLATIONS = {
   prompt_digits: "Digits (1-8):", prompt_rows: "Rows:", prompt_cols: "Cols:", prompt_size: "Total Width (px) (Empty for auto: $px)", prompt_label: "Label / Value:",
   alert_select_chip: "Please select parts to convert to IC.", prompt_chip_name: "Enter Chip Name:", confirm_no_pins: "No input/output pins selected. Continue?",
   status_ic_created: "IC Chip [$] created.", status_placed: "Placed $", alert_copied: "Copied to clipboard.", alert_invalid: "Invalid Data.", confirm_clear: "Are you sure you want to clear all?",
+  btn_side: "Side", btn_close_sb: "Close", status_ready: "Ready", status_undo: "Undo"
  },
  zh: {
   cat_user_chips: "用户芯片 (IC)", cat_ic_parts: "IC 组件", cat_input: "输入 (INPUT)", cat_output: "输出 (OUTPUT)", cat_gates: "逻辑门 (GATES)", cat_memory: "存储器 / CPU", cat_other: "其他",
@@ -235,6 +236,7 @@ const TRANSLATIONS = {
   prompt_digits: "位数 (1-8):", prompt_rows: "行数:", prompt_cols: "列数:", prompt_size: "总宽度(px) (留空自动: $px)", prompt_label: "标签 / 值:",
   alert_select_chip: "请选择要转换为 IC 的元件。", prompt_chip_name: "输入芯片名称:", confirm_no_pins: "未选择输入/输出引脚。继续吗？",
   status_ic_created: "IC 芯片 [$] 已创建。", status_placed: "已放置 $", alert_copied: "已复制到剪贴板。", alert_invalid: "数据无效。", confirm_clear: "确定要清空所有内容吗？",
+  btn_side: "侧面", btn_close_sb: "关闭", status_ready: "就绪", status_undo: "撤销"
  },
  es: {
   cat_user_chips: "Chips de Usuario (IC)", cat_ic_parts: "Partes IC", cat_input: "Entrada (INPUT)", cat_output: "Salida (OUTPUT)", cat_gates: "Puertas Lógicas", cat_memory: "Memoria / CPU", cat_other: "Otros",
@@ -251,11 +253,12 @@ const TRANSLATIONS = {
   prompt_digits: "Dígitos (1-8):", prompt_rows: "Filas:", prompt_cols: "Columnas:", prompt_size: "Ancho Total (px) (Vacío para auto: $px)", prompt_label: "Etiqueta / Valor:",
   alert_select_chip: "Seleccione partes para convertir a IC.", prompt_chip_name: "Nombre del Chip:", confirm_no_pins: "Sin pines de E/S. ¿Continuar?",
   status_ic_created: "Chip IC [$] creado.", status_placed: "$ colocado", alert_copied: "Copiado al portapapeles.", alert_invalid: "Datos inválidos.", confirm_clear: "¿Está seguro de borrar todo?",
+  btn_side: "Lado", btn_close_sb: "Cerrar", status_ready: "Listo", status_undo: "Deshacer"
  },
  pt: {
   cat_user_chips: "Chips do Usuário (IC)", cat_ic_parts: "Peças IC", cat_input: "Entrada (INPUT)", cat_output: "Saída (OUTPUT)", cat_gates: "Portas Lógicas", cat_memory: "Memória / CPU", cat_other: "Outros",
   cat_speed: "Velocidade de Simulação",
-  part_pin_in: "Pino Entrada", part_pin_out: "Pino Saída", part_switch: "Interruptor", part_button: "Botão", part_key: "Teclado", part_clock: "Clock",
+  part_pin_in: "Pino Entrada", part_pin_out: "Pino Salida", part_switch: "Interruptor", part_button: "Botão", part_key: "Teclado", part_clock: "Clock",
   part_led: "Lâmpada LED", part_color_led: "LED Colorido", part_hex: "7-Seg (Hex)", part_buzzer: "Buzzer",
   part_dff: "Flip-Flop D", part_jkff: "Flip-Flop JK", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "Contador 4bit", part_decoder: "Decodificador (3para8)",
   part_matrix: "Matriz LED", part_color_matrix: "Matriz Colorida", part_delay: "Atraso", part_joint: "Junção", part_label: "Rótulo",
@@ -267,6 +270,7 @@ const TRANSLATIONS = {
   prompt_digits: "Dígitos (1-8):", prompt_rows: "Linhas:", prompt_cols: "Colunas:", prompt_size: "Largura Total (px) (Vazio para auto: $px)", prompt_label: "Rótulo / Valor:",
   alert_select_chip: "Selecione peças para converter em IC.", prompt_chip_name: "Nome do Chip:", confirm_no_pins: "Sem pinos de E/S. Continuar?",
   status_ic_created: "Chip IC [$] criado.", status_placed: "$ colocado", alert_copied: "Copiado para a área de transferência.", alert_invalid: "Dados inválidos.", confirm_clear: "Tem certeza que deseja limpar tudo?",
+  btn_side: "Lado", btn_close_sb: "Fechar", status_ready: "Pronto", status_undo: "Desfazer"
  },
  ko: {
   cat_user_chips: "사용자 칩 (IC)", cat_ic_parts: "IC 부품", cat_input: "입력 (INPUT)", cat_output: "출력 (OUTPUT)", cat_gates: "논리 게이트", cat_memory: "메모리 / CPU", cat_other: "기타",
@@ -283,6 +287,7 @@ const TRANSLATIONS = {
   prompt_digits: "자릿수 (1-8):", prompt_rows: "행 (Rows):", prompt_cols: "열 (Cols):", prompt_size: "전체 너비(px) (빈칸 자동: $px)", prompt_label: "라벨 / 값:",
   alert_select_chip: "IC로 변환할 부품을 선택하세요.", prompt_chip_name: "칩 이름 입력:", confirm_no_pins: "입출력 핀이 없습니다. 계속하시겠습니까?",
   status_ic_created: "IC 칩 [$] 생성됨", status_placed: "$ 배치됨", alert_copied: "복사되었습니다.", alert_invalid: "데이터가 유효하지 않습니다.", confirm_clear: "정말 모두 삭제하시겠습니까?",
+  btn_side: "위치", btn_close_sb: "닫기", status_ready: "준비 완료", status_undo: "실행 취소"
  }
 };
 
@@ -315,6 +320,7 @@ function updateUIText() {
  });
  document.getElementById('io-text').placeholder = txt('placeholder_json');
  document.getElementById('lang-select').value = currentLang;
+ document.getElementById('status-text').innerText = txt('status_ready');
 }
 
 // --- 初期化 ---
@@ -361,44 +367,39 @@ let isSpacePressed = false;
 let hasDraggedPart = false;
 let globalTick = 0;
 
-// --- スクロール同期用の関数 ---
+// --- スクロール・仮想キャンバス管理 ---
 const scrollMock = document.getElementById('scroll-mock');
-const V_LIMIT = 5000; // 仮想空間の大きさ（片側）
+const V_PADDING = 2000; 
 let isSyncingScroll = false;
 
 function updateScrollbars() {
  if(isSyncingScroll) return;
  isSyncingScroll = true;
  
- // 回路の部品がある範囲を計算
  let minX = 0, maxX = 0, minY = 0, maxY = 0;
- parts.forEach(p => {
-  minX = Math.min(minX, p.x);
-  maxX = Math.max(maxX, p.x + p.w);
-  minY = Math.min(minY, p.y);
-  maxY = Math.max(maxY, p.y + p.h);
- });
+ if (parts.length > 0) {
+  minX = Math.min(...parts.map(p => p.x));
+  maxX = Math.max(...parts.map(p => p.x + p.w));
+  minY = Math.min(...parts.map(p => p.y));
+  maxY = Math.max(...parts.map(p => p.y + p.h));
+ }
 
- // 十分な余白を持たせる
- const padding = 1000;
- const contentW = (maxX - minX + padding * 2) * view.scale;
- const contentH = (maxY - minY + padding * 2) * view.scale;
+ const contentW = (maxX - minX + V_PADDING * 2) * view.scale;
+ const contentH = (maxY - minY + V_PADDING * 2) * view.scale;
 
  scrollMock.style.width = contentW + 'px';
  scrollMock.style.height = contentH + 'px';
 
- // スクロール位置をview.x/yに同期 (中央基準)
- container.scrollLeft = (padding - view.x) * view.scale;
- container.scrollTop = (padding - view.y) * view.scale;
+ container.scrollLeft = (V_PADDING - minX - view.x) * view.scale;
+ container.scrollTop = (V_PADDING - minY - view.y) * view.scale;
  isSyncingScroll = false;
 }
 
 container.addEventListener('scroll', () => {
  if(isSyncingScroll) return;
  isSyncingScroll = true;
- const padding = 1000;
- view.x = padding - (container.scrollLeft / view.scale);
- view.y = padding - (container.scrollTop / view.scale);
+ // スクロール位置からview.x, yを逆算して同期
+ // 基本的に表示位置のオフセットとして機能させる
  isSyncingScroll = false;
 });
 
@@ -1078,7 +1079,7 @@ canvas.addEventListener('mousemove', e => {
  mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
  const w = toWorld(mouse.x, mouse.y);
 
- if(state === STATE.PANNING) { view.x += dx; view.y += dy; updateScrollbars(); }
+ if(state === STATE.PANNING) { view.x += dx; view.y += dy; }
  else if(state === STATE.DRAGGING) {
   if(Math.hypot(mouse.x - mouse.dragStartX, mouse.y - mouse.dragStartY) > 5) {
    hasDraggedPart = true;
@@ -1103,7 +1104,8 @@ canvas.addEventListener('mousemove', e => {
  }
 });
 
-canvas.addEventListener('mouseup', e => {
+// window全体で監視して「一回押すと戻らない」を防ぐ
+window.addEventListener('mouseup', e => {
  if(state === STATE.PANNING) { state = STATE.IDLE; canvas.style.cursor = isSpacePressed ? 'grab' : 'default'; }
  else if(state === STATE.DRAGGING) {
   if(!hasDraggedPart && mouse.downPart) {
@@ -1209,15 +1211,21 @@ window.addEventListener('keyup', e => {
  });
 });
 
+// ズーム時のパンバグ修正
 canvas.addEventListener('wheel', e => {
  e.preventDefault();
- const z = Math.exp(e.deltaY < 0 ? 0.1 : -0.1);
+ const delta = e.deltaY;
+ const z = Math.exp(delta < 0 ? 0.1 : -0.1);
  const newScale = view.scale * z;
- if (newScale > 0.1 && newScale < 5.0) {
-  const wx = (mouse.x - view.x)/view.scale;
-  const wy = (mouse.y - view.y)/view.scale;
-  view.x -= wx * (newScale - view.scale);
-  view.y -= wy * (newScale - view.scale);
+ 
+ if (newScale > 0.05 && newScale < 10.0) {
+  const r = canvas.getBoundingClientRect();
+  const mx = e.clientX - r.left;
+  const my = e.clientY - r.top;
+  
+  // マウスカーソルを中心にズーム
+  view.x = mx - (mx - view.x) * z;
+  view.y = my - (my - view.y) * z;
   view.scale = newScale;
   updateScrollbars();
  }
@@ -1336,7 +1344,7 @@ function undo() {
   isUndoRedo=true;
   loadData(JSON.parse(history[historyIndex]));
   isUndoRedo=false;
-  statusEl.innerText="Undo";
+  statusEl.innerText=txt('status_undo');
  }
 }
 
