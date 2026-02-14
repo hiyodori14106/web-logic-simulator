@@ -8,6 +8,10 @@
   /* --- デザイン設定 --- */
   body { margin:0; overflow:hidden; background:#1e1e1e; font-family:'Meiryo', 'Segoe UI', sans-serif; display:flex; height:100vh; color:#ddd; }
   
+  /* サイドバー左右切り替え用設定 */
+  body.sidebar-right { flex-direction: row-reverse; }
+  body.sidebar-right #sidebar { border-right: none; border-left: 1px solid #333; }
+
   /* サイドバー */
   #sidebar { width:280px; background:#252525; border-right:1px solid #333; display:flex; flex-direction:column; padding:10px; box-sizing:border-box; user-select:none; z-index:10; overflow-y:auto; }
   #sidebar::-webkit-scrollbar { width: 8px; }
@@ -36,13 +40,21 @@
   .btn-save { background: #2b88d8; }
   .btn-io { background:#546e7a; width:100%; margin-bottom:5px; }
   .btn-clear { background:#d13438; width:100%; }
+  .btn-side { background:#607d8b; width:100%; margin-bottom:5px; } /* サイド切替用 */
 
-  /* キャンバス */
-  #canvas-container { flex: 1; position: relative; cursor: default; overflow: hidden; background: #1e1e1e; }
-  canvas { display: block; outline: none; }
+  /* キャンバス（スクロールバー対応） */
+  #canvas-container { flex: 1; position: relative; cursor: default; overflow: auto; background: #1e1e1e; }
+  #canvas-container::-webkit-scrollbar { width: 14px; height: 14px; }
+  #canvas-container::-webkit-scrollbar-track { background: #1e1e1e; }
+  #canvas-container::-webkit-scrollbar-thumb { background: #333; border: 3px solid #1e1e1e; border-radius: 10px; }
+  #canvas-container::-webkit-scrollbar-thumb:hover { background: #444; }
+
+  /* スクロール用のダミー要素（広大な領域を確保） */
+  #scroll-spacer { width: 10000px; height: 10000px; pointer-events: none; }
+  canvas { position: sticky; top: 0; left: 0; display: block; outline: none; z-index: 1; }
 
   /* ステータスバー */
-  #status-bar { position:absolute; bottom:0; left:0; right:0; height:26px; background:#0078d4; color:white; font-size:12px; line-height:26px; padding:0 10px; opacity:0.95; display:flex; justify-content:space-between; pointer-events:none; }
+  #status-bar { position:sticky; bottom:0; left:0; right:0; height:26px; background:#0078d4; color:white; font-size:12px; line-height:26px; padding:0 10px; opacity:0.95; display:flex; justify-content:space-between; pointer-events:none; z-index: 5; }
 
   /* モーダル (テキスト入出力) */
   #io-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:100; justify-content:center; align-items:center; }
@@ -123,6 +135,9 @@
   </div>
 
   <div class="tools-area">
+    <div class="cat-title">UI設定</div>
+    <button class="action-btn btn-side" onclick="toggleSidebar()"><span data-i18n="btn_side_toggle">↔ サイドバー左右切替</span></button>
+
     <button class="action-btn btn-create" onclick="createCustomChip()"><span data-i18n="btn_create_ic">⚡ 選択範囲をIC化</span></button>
     <div class="action-row">
       <button id="btn-ptr" class="action-btn btn-mode active" onclick="setMode('pointer')"><span data-i18n="btn_mode_ptr">👆 操作</span></button>
@@ -146,6 +161,7 @@
 </div> <!-- sidebarの終わり -->
 
 <div id="canvas-container">
+  <div id="scroll-spacer"></div>
   <canvas id="circuitCanvas" tabindex="0"></canvas>
   <div id="status-bar">
     <span id="status-text">Ready</span>
@@ -172,7 +188,7 @@
 const TRANSLATIONS = {
   ja: {
     cat_user_chips: "ユーザー定義チップ (IC)", cat_ic_parts: "IC作成用パーツ", cat_input: "入力 (INPUT)", cat_output: "出力 (OUTPUT)", cat_gates: "論理ゲート (GATES)", cat_memory: "メモリ / CPU", cat_other: "その他",
-    cat_speed: "シミュレーション速度",
+    cat_speed: "シミュレーション速度", btn_side_toggle: "↔ サイドバー左右切替",
     part_pin_in: "入力ピン (Pin In)", part_pin_out: "出力ピン (Pin Out)", part_switch: "スイッチ", part_button: "ボタン", part_key: "キーボード入力", part_clock: "クロック",
     part_led: "LEDランプ", part_color_led: "カラーLED", part_hex: "7セグ (16進)", part_buzzer: "ブザー",
     part_dff: "Dフリップフロップ", part_jkff: "JKフリップフロップ", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4bit カウンタ", part_decoder: "デコーダ (3to8)",
@@ -188,7 +204,7 @@ const TRANSLATIONS = {
   },
   en: {
     cat_user_chips: "User Chips (IC)", cat_ic_parts: "IC Parts", cat_input: "Input (INPUT)", cat_output: "Output (OUTPUT)", cat_gates: "Logic Gates (GATES)", cat_memory: "Memory / CPU", cat_other: "Others",
-    cat_speed: "Simulation Speed",
+    cat_speed: "Simulation Speed", btn_side_toggle: "↔ Sidebar Left/Right",
     part_pin_in: "Pin In", part_pin_out: "Pin Out", part_switch: "Switch", part_button: "Button", part_key: "Keyboard Input", part_clock: "Clock",
     part_led: "LED Lamp", part_color_led: "Color LED", part_hex: "7-Seg (Hex)", part_buzzer: "Buzzer",
     part_dff: "D Flip-Flop", part_jkff: "JK Flip-Flop", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4bit Counter", part_decoder: "Decoder (3to8)",
@@ -204,7 +220,7 @@ const TRANSLATIONS = {
   },
   zh: {
     cat_user_chips: "用户芯片 (IC)", cat_ic_parts: "IC 组件", cat_input: "输入 (INPUT)", cat_output: "输出 (OUTPUT)", cat_gates: "逻辑门 (GATES)", cat_memory: "存储器 / CPU", cat_other: "其他",
-    cat_speed: "模拟速度",
+    cat_speed: "模拟速度", btn_side_toggle: "↔ 切换侧边栏位置",
     part_pin_in: "输入引脚 (Pin In)", part_pin_out: "输出引脚 (Pin Out)", part_switch: "开关", part_button: "按钮", part_key: "键盘输入", part_clock: "时钟",
     part_led: "LED 灯", part_color_led: "彩色 LED", part_hex: "7段数码管 (16进制)", part_buzzer: "蜂鸣器",
     part_dff: "D 触发器", part_jkff: "JK 触发器", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4位计数器", part_decoder: "译码器 (3to8)",
@@ -217,59 +233,10 @@ const TRANSLATIONS = {
     prompt_digits: "位数 (1-8):", prompt_rows: "行数:", prompt_cols: "列数:", prompt_size: "总宽度(px) (留空自动: $px)", prompt_label: "标签 / 值:",
     alert_select_chip: "请选择要转换为 IC 的元件。", prompt_chip_name: "输入芯片名称:", confirm_no_pins: "未选择输入/输出引脚。继续吗？",
     status_ic_created: "IC 芯片 [$] 已创建。", status_placed: "已放置 $", alert_copied: "已复制到剪贴板。", alert_invalid: "数据无效。", confirm_clear: "确定要清空所有内容吗？",
-  },
-  es: {
-    cat_user_chips: "Chips de Usuario (IC)", cat_ic_parts: "Partes IC", cat_input: "Entrada (INPUT)", cat_output: "Salida (OUTPUT)", cat_gates: "Puertas Lógicas", cat_memory: "Memoria / CPU", cat_other: "Otros",
-    cat_speed: "Velocidad de Simulación",
-    part_pin_in: "Pin Entrada", part_pin_out: "Pin Salida", part_switch: "Interruptor", part_button: "Botón", part_key: "Entrada Teclado", part_clock: "Reloj",
-    part_led: "Lámpara LED", part_color_led: "LED Color", part_hex: "7-Seg (Hex)", part_buzzer: "Zumbador",
-    part_dff: "Flip-Flop D", part_jkff: "Flip-Flop JK", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "Contador 4bit", part_decoder: "Decodificador (3a8)",
-    part_matrix: "Matriz LED", part_color_matrix: "Matriz Color", part_delay: "Retardo", part_joint: "Unión", part_label: "Etiqueta",
-    btn_create_ic: "⚡ Crear IC", btn_mode_ptr: "👆 Interactuar", btn_mode_pan: "✋ Mover", btn_mode_sel: "⛝ Seleccionar",
-    btn_share: "📋 Compartir Datos", btn_save: "💾 Guardar", btn_open: "📂 Abrir", btn_clear: "🗑 Borrar Todo",
-    modal_title: "Datos del Circuito (JSON)", btn_close: "Cerrar", btn_copy: "Copiar", btn_load: "Cargar",
-    placeholder_json: "Pegar JSON aquí...", default_text: "Texto",
-    prompt_rom: "Datos ROM (16 valores Hex separados por espacio):", prompt_key: "Asignar Tecla:", confirm_toggle: "¿Activar modo interruptor?",
-    prompt_digits: "Dígitos (1-8):", prompt_rows: "Filas:", prompt_cols: "Columnas:", prompt_size: "Ancho Total (px) (Vacío para auto: $px)", prompt_label: "Etiqueta / Valor:",
-    alert_select_chip: "Seleccione partes para convertir a IC.", prompt_chip_name: "Nombre del Chip:", confirm_no_pins: "Sin pines de E/S. ¿Continuar?",
-    status_ic_created: "Chip IC [$] creado.", status_placed: "$ colocado", alert_copied: "Copiado al portapapeles.", alert_invalid: "Datos inválidos.", confirm_clear: "¿Está seguro de borrar todo?",
-  },
-  pt: {
-    cat_user_chips: "Chips do Usuário (IC)", cat_ic_parts: "Peças IC", cat_input: "Entrada (INPUT)", cat_output: "Saída (OUTPUT)", cat_gates: "Portas Lógicas", cat_memory: "Memória / CPU", cat_other: "Outros",
-    cat_speed: "Velocidade de Simulação",
-    part_pin_in: "Pino Entrada", part_pin_out: "Pino Saída", part_switch: "Interruptor", part_button: "Botão", part_key: "Teclado", part_clock: "Clock",
-    part_led: "Lâmpada LED", part_color_led: "LED Colorido", part_hex: "7-Seg (Hex)", part_buzzer: "Buzzer",
-    part_dff: "Flip-Flop D", part_jkff: "Flip-Flop JK", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "Contador 4bit", part_decoder: "Decodificador (3para8)",
-    part_matrix: "Matriz LED", part_color_matrix: "Matriz Colorida", part_delay: "Atraso", part_joint: "Junção", part_label: "Rótulo",
-    btn_create_ic: "⚡ Criar IC", btn_mode_ptr: "👆 Interagir", btn_mode_pan: "✋ Mover", btn_mode_sel: "⛝ Selecionar",
-    btn_share: "📋 Compartilhar Dados", btn_save: "💾 Salvar", btn_open: "📂 Abrir", btn_clear: "🗑 Limpar Tudo",
-    modal_title: "Dados do Circuito (JSON)", btn_close: "Fechar", btn_copy: "Copiar", btn_load: "Carregar",
-    placeholder_json: "Cole o JSON aqui...", default_text: "Texto",
-    prompt_rom: "Dados ROM (16 valores Hex separados por espaço):", prompt_key: "Atribuir Tecla:", confirm_toggle: "Ativar modo alternância?",
-    prompt_digits: "Dígitos (1-8):", prompt_rows: "Linhas:", prompt_cols: "Colunas:", prompt_size: "Largura Total (px) (Vazio para auto: $px)", prompt_label: "Rótulo / Valor:",
-    alert_select_chip: "Selecione peças para converter em IC.", prompt_chip_name: "Nome do Chip:", confirm_no_pins: "Sem pinos de E/S. Continuar?",
-    status_ic_created: "Chip IC [$] criado.", status_placed: "$ colocado", alert_copied: "Copiado para a área de transferência.", alert_invalid: "Dados inválidos.", confirm_clear: "Tem certeza que deseja limpar tudo?",
-  },
-  ko: {
-    cat_user_chips: "사용자 칩 (IC)", cat_ic_parts: "IC 부품", cat_input: "입력 (INPUT)", cat_output: "출력 (OUTPUT)", cat_gates: "논리 게이트", cat_memory: "메모리 / CPU", cat_other: "기타",
-    cat_speed: "시뮬레이션 속도",
-    part_pin_in: "입력 핀", part_pin_out: "출력 핀", part_switch: "스위치", part_button: "버튼", part_key: "키보드 입력", part_clock: "클럭",
-    part_led: "LED 램프", part_color_led: "컬러 LED", part_hex: "7세그먼트 (Hex)", part_buzzer: "부저",
-    part_dff: "D 플립플롭", part_jkff: "JK 플립플롭", part_ram: "RAM (4bit x 16)", part_rom: "ROM (4bit x 16)", part_counter: "4비트 카운터", part_decoder: "디코더 (3to8)",
-    part_matrix: "매트릭스 LED", part_color_matrix: "컬러 매트릭스", part_delay: "지연 (Delay)", part_joint: "접점", part_label: "라벨",
-    btn_create_ic: "⚡ 선택 영역 IC화", btn_mode_ptr: "👆 조작", btn_mode_pan: "✋ 이동", btn_mode_sel: "⛝ 선택",
-    btn_share: "📋 텍스트 데이터 공유", btn_save: "💾 저장", btn_open: "📂 열기", btn_clear: "🗑 전체 삭제",
-    modal_title: "회로 데이터 (JSON)", btn_close: "닫기", btn_copy: "복사", btn_load: "불러오기",
-    placeholder_json: "여기에 JSON 데이터를 붙여넣으세요...", default_text: "텍스트",
-    prompt_rom: "ROM 데이터 (16진수 16개 공백 구분):", prompt_key: "할당 키:", confirm_toggle: "토글 모드로 설정합니까?",
-    prompt_digits: "자릿수 (1-8):", prompt_rows: "행 (Rows):", prompt_cols: "열 (Cols):", prompt_size: "전체 너비(px) (빈칸 자동: $px)", prompt_label: "라벨 / 값:",
-    alert_select_chip: "IC로 변환할 부품을 선택하세요.", prompt_chip_name: "칩 이름 입력:", confirm_no_pins: "입출력 핀이 없습니다. 계속하시겠습니까?",
-    status_ic_created: "IC 칩 [$] 생성됨", status_placed: "$ 배치됨", alert_copied: "복사되었습니다.", alert_invalid: "데이터가 유효하지 않습니다.", confirm_clear: "정말 모두 삭제하시겠습니까?",
   }
 };
 
-let currentLang = 'en';
-// ブラウザの言語設定を確認
+let currentLang = 'ja';
 const navLang = navigator.language.slice(0,2);
 if(TRANSLATIONS[navLang]) currentLang = navLang;
 
@@ -277,6 +244,10 @@ function txt(key, replacement) {
   let str = TRANSLATIONS[currentLang][key] || TRANSLATIONS['en'][key] || key;
   if (replacement !== undefined) str = str.replace('$', replacement);
   return str;
+}
+
+function toggleSidebar() {
+  document.body.classList.toggle('sidebar-right');
 }
 
 function changeLanguage(lang) {
@@ -287,16 +258,10 @@ function changeLanguage(lang) {
 function updateUIText() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const k = el.getAttribute('data-i18n');
-    // 子要素にアイコンがある場合など、テキストだけ置換したいが簡易的にinnerHTMLで対応
-    // ただしボタンなどはアイコンを含むため、既存のHTML構造を維持しつつテキストノードだけ変えるのが理想だが、
-    // ここでは単純化のため、アイコンを含む定義済みの文字列を使うか、テキストのみ置換する
-    if (k === 'btn_create_ic') el.innerText = txt(k); // 特殊処理
-    else if (el.querySelector('.icon')) {
-        // アイコンがある場合はテキストノードのみ更新（簡易実装）
+    if (el.querySelector('.icon')) {
         const iconHTML = el.querySelector('.icon').outerHTML;
         el.innerHTML = iconHTML + " " + txt(k);
-    }
-    else {
+    } else {
         el.innerText = txt(k);
     }
   });
@@ -304,18 +269,17 @@ function updateUIText() {
   document.getElementById('lang-select').value = currentLang;
 }
 
-// --- 初期化 (Super-Speed v6 + Fixes) ---
+// --- 初期化 ---
 const canvas = document.getElementById('circuitCanvas');
 const ctx = canvas.getContext('2d');
 const container = document.getElementById('canvas-container');
+const spacer = document.getElementById('scroll-spacer');
 const statusEl = document.getElementById('status-text');
-const audioCtx = new AudioContext();
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const modal = document.getElementById('io-modal');
 const ioText = document.getElementById('io-text');
 
-// 速度変数 (可変に変更)
 let loopsPerFrame = 1; 
-
 function changeSpeed(val) {
   loopsPerFrame = parseInt(val);
   document.getElementById('speed-val').innerText = val;
@@ -325,6 +289,8 @@ const GRID = 20;
 const COLORS = { text: '#fff', select: '#00e5ff', wireOn: '#76ff03', wireOff: '#555', pin: '#999', pinActive: '#76ff03', chip: '#37474f' };
 const WIRE_COLORS = [null, '#ff2222', '#2288ff', '#ffff00', '#ff00ff', '#ffffff'];
 
+const WORLD_SIZE = 10000;
+const OFFSET_BASE = WORLD_SIZE / 2;
 let view = { x: 0, y: 0, scale: 1.0 };
 let width, height;
 let parts = [];
@@ -345,12 +311,27 @@ let dragOffsets = new Map();
 let tempWire = null;
 let targetPort = null;
 let clipboard = null;
-let isShiftPressed = false;
 let isSpacePressed = false;
 let hasDraggedPart = false;
 let globalTick = 0;
 
-function toWorld(sx, sy) { return { x: (sx - view.x) / view.scale, y: (sy - view.y) / view.scale }; }
+// スクロールバーとの同期ロジック
+function syncScrollToView() {
+  container.scrollLeft = OFFSET_BASE - view.x;
+  container.scrollTop = OFFSET_BASE - view.y;
+}
+
+container.onscroll = (e) => {
+  if (state !== STATE.PANNING && state !== STATE.DRAGGING) {
+    view.x = OFFSET_BASE - container.scrollLeft;
+    view.y = OFFSET_BASE - container.scrollTop;
+  }
+};
+
+function toWorld(sx, sy) { 
+  const r = canvas.getBoundingClientRect();
+  return { x: (sx - view.x) / view.scale, y: (sy - view.y) / view.scale }; 
+}
 function snap(v) { return Math.round(v/GRID)*GRID; }
 
 const STD_DEF = {
@@ -584,7 +565,6 @@ class Part {
             }
           }
         } else {
-            // Color Matrix
             const startR = this.rows;
             const startG = this.rows + this.cols;
             const startB = this.rows + this.cols * 2;
@@ -777,10 +757,8 @@ class Part {
         if(this.type==='Joint') ctx.fillStyle = 'rgba(0,0,0,0)';
         ctx.fill();
       };
-      const inCount = this.inputs.length;
-      const outCount = this.outputs.length;
-      for(let i=0; i<inCount; i++) drawP(true, i);
-      for(let i=0; i<outCount; i++) drawP(false, i);
+      for(let i=0; i<this.inputs.length; i++) drawP(true, i);
+      for(let i=0; i<this.outputs.length; i++) drawP(false, i);
     }
     ctx.restore();
   }
@@ -789,10 +767,10 @@ class Part {
     if(this.type==='Matrix' && isInput) {
       const R = this.rows || 8;
       const C = this.cols || 8;
-      if(idx < R) { // Row
+      if(idx < R) {
         const step = this.h / (R + 1);
         return {x:this.x, y:this.y + step*(idx+1)};
-      } else { // Col
+      } else {
         const colIdx = idx - R;
         const step = this.w / (C + 1);
         return {x:this.x + step*(colIdx+1), y:this.y+this.h};
@@ -806,14 +784,11 @@ class Part {
             return {x:this.x, y:this.y + step*(idx+1)};
         } else {
             const colTotalIdx = idx - R;
-            const totalCols = 3 * C;
-            const step = this.w / (totalCols + 1);
+            const step = this.w / (3 * C + 1);
             return {x:this.x + step*(colTotalIdx+1), y:this.y+this.h};
         }
     }
-    if(this.type==='Joint') {
-      return {x:this.x+this.w/2, y:this.y+this.h/2};
-    }
+    if(this.type==='Joint') return {x:this.x+this.w/2, y:this.y+this.h/2};
     const cnt = isInput ? this.inputs.length : this.outputs.length;
     if((this.isCustom || this.type==='RAM' || this.type==='ROM' || this.type==='HexDisp') && isInput) {
       const step = this.h/(cnt+1);
@@ -834,6 +809,7 @@ function resize() {
 }
 window.onresize = resize;
 resize();
+syncScrollToView();
 
 function loop() {
   for(let i=0; i<loopsPerFrame; i++) {
@@ -862,11 +838,9 @@ function loop() {
     if (w.targetIdx >= w.target.inputs.length) return;
     const p2 = w.target.getPortPos(true, w.targetIdx);
     const isActive = w.source.outputs[w.sourceIdx];
-    
     ctx.beginPath();
     ctx.moveTo(p1.x, p1.y);
     ctx.bezierCurveTo(p1.x+30, p1.y, p2.x-30, p2.y, p2.x, p2.y);
-    
     if (selectedWires.includes(w)) {
       ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 4 / view.scale; ctx.stroke(); ctx.lineWidth = 2 / view.scale;
     }
@@ -927,7 +901,10 @@ function hitTestWire(mx, my) {
 
 function drag(e, type) { e.dataTransfer.setData('text/plain', type); }
 canvas.addEventListener('dragover', e => e.preventDefault());
-canvas.addEventListener('drop', e => { e.preventDefault(); const type = e.dataTransfer.getData('text/plain'); if(type) addPart(type, e.clientX, e.clientY); });
+canvas.addEventListener('drop', e => { 
+  e.preventDefault(); const type = e.dataTransfer.getData('text/plain'); 
+  if(type) addPart(type, e.clientX, e.clientY); 
+});
 
 function addPart(type, cx, cy) {
   let wPos;
@@ -953,10 +930,7 @@ function deletePartAt(cx, cy) {
     return;
   }
   const hitWire = hitTestWire(w.x, w.y);
-  if(hitWire) {
-    wires = wires.filter(w => w !== hitWire);
-    pushHistory();
-  }
+  if(hitWire) { wires = wires.filter(w => w !== hitWire); pushHistory(); }
 }
 
 canvas.addEventListener('mousedown', e => {
@@ -1003,7 +977,10 @@ canvas.addEventListener('mousemove', e => {
   mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
   const w = toWorld(mouse.x, mouse.y);
 
-  if(state === STATE.PANNING) { view.x += dx; view.y += dy; }
+  if(state === STATE.PANNING) { 
+    view.x += dx; view.y += dy; 
+    syncScrollToView();
+  }
   else if(state === STATE.DRAGGING) {
     if(Math.hypot(mouse.x - mouse.dragStartX, mouse.y - mouse.dragStartY) > 5) {
       hasDraggedPart = true;
@@ -1142,6 +1119,7 @@ canvas.addEventListener('wheel', e => {
     view.x -= wx * (newScale - view.scale);
     view.y -= wy * (newScale - view.scale);
     view.scale = newScale;
+    syncScrollToView();
   }
 });
 
@@ -1154,7 +1132,6 @@ function createCustomChip() {
   const inPins = selectedParts.filter(p => p.type==='PinIn').sort((a,b)=>a.y-b.y);
   const outPins = selectedParts.filter(p => p.type==='PinOut').sort((a,b)=>a.y-b.y);
   if(inPins.length===0 && outPins.length===0 && !confirm(txt('confirm_no_pins'))) return;
-
   let minX=Infinity, minY=Infinity;
   selectedParts.forEach(p => { if(p.x<minX)minX=p.x; if(p.y<minY)minY=p.y; });
   const chipParts = selectedParts.map(p => ({
@@ -1165,7 +1142,6 @@ function createCustomChip() {
   const chipWires = wires.filter(w => selectedParts.includes(w.source) && selectedParts.includes(w.target)).map(w => ({
     srcId: w.source.id, srcIdx: w.sourceIdx, tgtId: w.target.id, tgtIdx: w.targetIdx, color: w.color
   }));
-
   customDefs[name] = {
     w: 60, h: Math.max(40, Math.max(inPins.length, outPins.length)*20+20),
     in: inPins.length, out: outPins.length,
@@ -1182,7 +1158,6 @@ function addChipToSidebar(name) {
   const div = document.createElement('div');
   div.className = 'tool-btn';
   div.draggable = true;
-  // Fixed empty template literal here
   div.innerHTML = `<span class="icon">🧩</span> ${name}`;
   div.onclick = () => addPart(name);
   div.ondragstart = (e) => drag(e, name);
@@ -1217,7 +1192,6 @@ function loadData(d) {
   document.getElementById('user-chips-list').innerHTML = '';
   Object.keys(customDefs).forEach(name => addChipToSidebar(name));
   parts = []; wires = [];
-
   if(d.parts) d.parts.forEach(p => {
     const np = new Part(p.type, p.x, p.y);
     Object.assign(np, p);
@@ -1231,29 +1205,24 @@ function loadData(d) {
     const t = parts.find(p=>p.id===w.tgtId);
     if(s && t) wires.push({ source:s, sourceIdx:w.srcIdx, target:t, targetIdx:w.tgtIdx, color:w.color });
   });
+  syncScrollToView();
 }
 
 function pushHistory() {
   if(isUndoRedo) return;
-  const state = JSON.stringify({
+  const stateStr = JSON.stringify({
     customDefs,
     parts: parts.map(p=>({ id:p.id, type:p.type, x:p.x, y:p.y, label:p.label, assignedKey:p.assignedKey, data:p.data, digits:p.digits, rows:p.rows, cols:p.cols, interval:p.interval })),
     wires: wires.map(w=>({srcId:w.source.id, srcIdx:w.sourceIdx, tgtId:w.target.id, tgtIdx:w.targetIdx, color:w.color}))
   });
   if(historyIndex < history.length-1) history = history.slice(0, historyIndex+1);
-  history.push(state);
+  history.push(stateStr);
   if(history.length>MAX_HISTORY) history.shift(); else historyIndex++;
 }
 setTimeout(pushHistory, 100);
 
 function undo() {
-  if(historyIndex>0) {
-    historyIndex--;
-    isUndoRedo=true;
-    loadData(JSON.parse(history[historyIndex]));
-    isUndoRedo=false;
-    statusEl.innerText="Undo";
-  }
+  if(historyIndex>0) { historyIndex--; isUndoRedo=true; loadData(JSON.parse(history[historyIndex])); isUndoRedo=false; statusEl.innerText="Undo"; }
 }
 
 function deleteSelected() {
@@ -1278,7 +1247,6 @@ function pasteSelection() {
   const center = toWorld(width/2, height/2);
   let minX=Infinity, minY=Infinity;
   clipboard.parts.forEach(p=>{if(p.x<minX)minX=p.x; if(p.y<minY)minY=p.y;});
-  
   selectedParts=[];
   const map={};
   clipboard.parts.forEach(p=>{
@@ -1295,7 +1263,6 @@ function pasteSelection() {
     selectedParts.push(np);
     map[p.id]=np;
   });
-
   clipboard.wires.forEach(w=>{
     const s=map[w.srcId], t=map[w.tgtId];
     if(s&&t) wires.push({source:s, sourceIdx:w.srcIdx, target:t, targetIdx:w.tgtIdx, color:w.color});
@@ -1323,7 +1290,4 @@ updateUIText();
 loop();
 </script>
 </body>
-</html>
-
-
-
+</html
